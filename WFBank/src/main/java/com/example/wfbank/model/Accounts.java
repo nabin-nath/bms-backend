@@ -2,6 +2,7 @@ package com.example.wfbank.model;
 
 //package com.example.demo.model;
 import java.math.BigDecimal;
+import javax.validation.constraints.Email;
 import java.sql.Date;
 
 import javax.persistence.CascadeType;
@@ -33,7 +34,7 @@ public class Accounts {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name="accNumber")
 	private long accNumber;
-	
+
 	@Column(name="title", nullable=false)
 	private String title;
 	
@@ -52,6 +53,9 @@ public class Accounts {
 	@Column(name="mobile", nullable=false)
 	private String mobile;
 	
+	@Email(message = "Email is not valid", regexp = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$")
+	@NotEmpty(message = "Email cannot be empty")
+	private String email;
 	@Column(name="email", nullable=false)
 	private String email;
 	
