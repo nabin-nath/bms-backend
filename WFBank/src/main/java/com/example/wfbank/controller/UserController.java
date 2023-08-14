@@ -2,6 +2,7 @@ package com.example.wfbank.controller;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -13,23 +14,39 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.wfbank.model.Accounts;
 import com.example.wfbank.model.User;
+import com.example.wfbank.service.AccountsService;
 import com.example.wfbank.service.UserService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RestController
 @RequestMapping("/api/user")
 public class UserController {
 	
-	private UserService UserService;
-
+	@Autowired private UserService UserService;
+	@Autowired private AccountsService accountService;
+	private ObjectMapper objectMapper;
+	
 	public UserController(UserService UserService) {
 		super();
 		this.UserService = UserService;
+		objectMapper = new ObjectMapper();
+		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 	}
 	
 	// build create account REST API
 	@PostMapping()
-	public ResponseEntity<User> saveUser(@RequestBody User user){
+	public ResponseEntity<User> saveUser(@RequestBody String requestBody) throws JsonMappingException, JsonProcessingException{
+		
+		JsonNode jsonNode = objectMapper.readTree(requestBody);
+		Accounts account = accountService.getAccountsById(jsonNode.get("accNumber").asLong());
+		User user = objectMapper.readValue(requestBody, User.class);
+		user.setAccount(account);
 		return new ResponseEntity<User>(UserService.saveUser(user), HttpStatus.CREATED);
 	}
 	

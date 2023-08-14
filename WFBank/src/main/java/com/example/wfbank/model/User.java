@@ -37,44 +37,5 @@ public class User {
 	@OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "accNumber", referencedColumnName="accNumber")
 	private Accounts account;
-	
-	public long getUserId() {
-		return userId;
-	}
 
-	public void setUserId(long userId) {
-		this.userId = userId;
-	}
-
-	public String getUsername() {
-		return username;
-	}
-
-	public void setUsername(String username) {
-		this.username = username;
-	}
-
-	public String getPassword() {
-		return password;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
-	}
-
-	public String getPin() {
-		return pin;
-	}
-
-	public void setPin(String pin) {
-		this.pin = pin;
-	}
-
-	public Accounts getAccount() {
-		return account;
-	}
-
-	public void setAccount(Accounts account) {
-		this.account = account;
-	}
 }
