@@ -1,0 +1,43 @@
+CREATE TABLE Accounts (
+	accNumber int not null,
+	title varchar(10) not null,
+	firstName varchar(20) not null,
+	middleName varchar(20),
+	lastName varchar(20) not null,
+	fatherName varchar(30) not null,
+	mobile varchar(15) not null,
+	email varchar(25) not null,
+	aadhar varchar(25) not null,
+	dob date not null,
+	residentAddress blob not null,
+	permanentAddress blob not null,
+	occupationDetails blob not null,
+	debitCardRequired boolean not null,
+	netBankingRequired boolean not null,
+	balance decimal not null);
+
+	
+CREATE TABLE Users (
+	userId Binary Primary key not null,
+	userName varchar(25) unique not null,
+	passWord varchar(25) not null,
+	pin int not null,
+	accountNumber int not null);
+CREATE TABLE Transactions (
+	transactionID binary primary key not null,
+	userId Binary not null,
+	fromAccountNumber int not null,
+	toAccountNumber int not null,
+	amount decimal not null,
+	transactionType varchar(15) not null,
+	time Date not null,
+	remarks Text);
+CREATE TABLE Payee (
+	payeeId binary primary key not null,
+	accountNumber int not null,
+	benifciaryName varchar(30) not null,
+	benificiaryAccountNumber int not null,
+	nickName varchar(30));
+CREATE TABLE Admin (
+	userName varchar(30) not null,
+	password varchar(30) not null);

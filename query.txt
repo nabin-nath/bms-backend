@@ -1,0 +1,33 @@
+{
+"aadhar": 123456,
+"balance": 90.0,
+"debitCardRequired": true,
+"dob": "2023-01-01",
+"email": "a@b.com",
+"fatherName": "name",
+"firstName": "Aquib", 
+"lastName": "name",
+"middleName": "name",
+"mobile": 23455,
+"netBankingRequired": true,
+"occupationDetails": {
+    "occupationType": "we",
+    "sourceOfIncome": "none",
+    "grossAnnualIncome": 1000
+},
+"permanentAddress": {
+    "line1": "line",
+    "line2": "line",
+    "city": "Mumbai",
+    "pinCode": 234353
+},
+"residentAddress": {
+    "line1": "line",
+    "line2": "line3",
+    "city": "Mumbai",
+    "pinCode": 234353
+},
+"title": "a"
+
+
+}
