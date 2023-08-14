@@ -31,6 +31,7 @@ public class AccountsController {
 	// build create account REST API
 	@PostMapping()
 	public ResponseEntity<Accounts> saveAccounts(@RequestBody Accounts account){
+		
 		return new ResponseEntity<Accounts>(accountService.saveAccounts(account), HttpStatus.CREATED);
 	}
 	
