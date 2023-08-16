@@ -2,7 +2,6 @@ package com.example.wfbank.model;
 
 //package com.example.demo.model;
 import java.math.BigDecimal;
-import javax.validation.constraints.Email;
 import java.sql.Date;
 
 import javax.persistence.CascadeType;
@@ -14,6 +13,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -36,34 +37,40 @@ public class Accounts {
 	private long accNumber;
 
 	@Column(name="title", nullable=false)
+	@NotEmpty
 	private String title;
 	
 	@Column(name="firstName", nullable=false)
+	@NotEmpty
 	private String firstName;
 	
 	@Column(name="lastName", nullable=false)
+	@NotEmpty
 	private String lastName;
 	
 	@Column(name="middleName", nullable=true)
 	private String middleName;
 	
 	@Column(name="fatherName", nullable=false)
+	@NotEmpty
 	private String fatherName;
 	
 	@Column(name="mobile", nullable=false)
+	@NotEmpty
 	private String mobile;
 	
 	@Email(message = "Email is not valid", regexp = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$")
 	@NotEmpty(message = "Email cannot be empty")
-	private String email;
 	@Column(name="email", nullable=false)
 	private String email;
 	
 	@Column(name="aadhar", nullable=false)
+	@NotEmpty
 	private String aadhar;
 	
 	@JsonFormat(pattern="yyyy-MM-dd")
 	@Column(name="dob", nullable=false)
+	@NotEmpty
 	private Date dob;
 	
 	@OneToOne(cascade=CascadeType.ALL)
@@ -79,11 +86,13 @@ public class Accounts {
 	private JobDetail occupationDetails;
 	
 	@Column(name="debitCardRequired", nullable=false)
-	private boolean debitCardRequired;
+	private boolean debitCardRequired=false;
 	
 	@Column(name="netBankingRequired", nullable=false)
-	private boolean netBankingRequired;
+	private boolean netBankingRequired=false;
 	
 	@Column(name="balance", nullable=false)
 	private BigDecimal balance;
+	
+	private Boolean approved = false;
 }

@@ -6,6 +6,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Transient;
 
 import com.sun.istack.NotNull;
 
@@ -31,4 +32,11 @@ public class JobDetail {
 	
 	@NotNull
 	private BigDecimal grossAnnualIncome;
+
+	@Transient
+	private static String [] nonNullFields = {"occupationType", "sourceOfIncome", "grossAnnualIncome"};
+	
+	public static String [] getNonNullFields() {
+		return nonNullFields;
+	}
 }

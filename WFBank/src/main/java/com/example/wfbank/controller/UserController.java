@@ -41,11 +41,10 @@ public class UserController {
 	
 	// build create account REST API
 	@PostMapping()
-	public ResponseEntity<User> saveUser(@RequestBody String requestBody) throws JsonMappingException, JsonProcessingException{
-		
-		JsonNode jsonNode = objectMapper.readTree(requestBody);
+	public ResponseEntity<User> saveUser(@RequestBody JsonNode jsonNode) throws JsonMappingException, JsonProcessingException{
+//		JsonNode jsonNode = objectMapper.readTree(requestBody);
 		Accounts account = accountService.getAccountsById(jsonNode.get("accNumber").asLong());
-		User user = objectMapper.readValue(requestBody, User.class);
+		User user = objectMapper.treeToValue(jsonNode, User.class);
 		user.setAccount(account);
 		return new ResponseEntity<User>(UserService.saveUser(user), HttpStatus.CREATED);
 	}
