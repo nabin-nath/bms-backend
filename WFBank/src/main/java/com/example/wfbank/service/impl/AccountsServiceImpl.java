@@ -2,8 +2,6 @@ package com.example.wfbank.service.impl;
 
 import java.util.List;
 
-import javax.validation.Valid;
-
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -23,7 +21,7 @@ public class AccountsServiceImpl implements AccountsService {
 		this.accountsRepository = accountsRepository;
 	}
 	@Override
-	public Accounts saveAccounts(@Valid Accounts accounts) {
+	public Accounts saveAccounts(Accounts accounts) {
 		// TODO Auto-generated method stub		
 		return accountsRepository.save(accounts);
 	}
