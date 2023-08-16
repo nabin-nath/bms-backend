@@ -70,7 +70,6 @@ public class Accounts {
 	
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern="yyyy-MM-dd", timezone="IST")
 	@Column(name="dob", nullable=false)
-	@NotEmpty
 	private Date dob;
 	
 	@OneToOne(cascade=CascadeType.ALL)

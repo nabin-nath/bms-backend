@@ -23,7 +23,7 @@ public class AccountsServiceImpl implements AccountsService {
 		this.accountsRepository = accountsRepository;
 	}
 	@Override
-	public Accounts saveAccounts(@Valid Accounts accounts) {
+	public Accounts saveAccounts(Accounts accounts) {
 		// TODO Auto-generated method stub		
 		return accountsRepository.save(accounts);
 	}
