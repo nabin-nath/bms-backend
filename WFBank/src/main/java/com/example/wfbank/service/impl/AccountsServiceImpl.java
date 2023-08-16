@@ -2,8 +2,6 @@ package com.example.wfbank.service.impl;
 
 import java.util.List;
 
-import javax.validation.Valid;
-
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
