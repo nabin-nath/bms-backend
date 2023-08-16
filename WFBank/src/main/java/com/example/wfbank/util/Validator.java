@@ -26,6 +26,8 @@ public class Validator {
 		if (nonNullValidator(obj)) {
 			String dateAsString = obj.asText();
 			String pattern = "yyyy-MM-dd";
+			if(!dateAsString.matches("^\\d{4}-\\d{2}-\\d{2}$"))
+				throw new Exception("Date Pattern Must Match " + pattern);
 			SimpleDateFormat sdf = new SimpleDateFormat(pattern);
 			sdf.setLenient(false);
 			try {
