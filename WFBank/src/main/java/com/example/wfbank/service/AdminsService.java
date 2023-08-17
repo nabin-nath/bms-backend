@@ -7,7 +7,7 @@ import com.example.wfbank.model.Accounts;
 import java.util.List;
 import com.example.wfbank.model.Admins;
 
-public interface AdminsServices {
+public interface AdminsService {
 	Admins saveAdmin(Admins admin);
 	List<Admins> getAllAdmins();
 	Admins getAdminById(long id);

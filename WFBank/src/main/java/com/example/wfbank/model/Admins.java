@@ -10,9 +10,7 @@ import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Data
 @Entity
@@ -25,6 +23,8 @@ public class Admins {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name="id")
 	private long id;
+	@Column(name="adminName", nullable=false)
 	private String adminName;
+	@Column(name="password", nullable=false)
 	private String password;
 }

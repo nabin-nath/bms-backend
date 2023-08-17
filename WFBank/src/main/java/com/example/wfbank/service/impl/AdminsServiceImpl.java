@@ -6,13 +6,13 @@ import org.springframework.stereotype.Service;
 
 import com.example.wfbank.model.Admins;
 import com.example.wfbank.repository.AdminRepository;
-import com.example.wfbank.service.AdminsServices;
+import com.example.wfbank.service.AdminsService;
 
 @Service
-public class AdminsServicesImpl implements AdminsServices{
+public class AdminsServiceImpl implements AdminsService{
 	private AdminRepository adminRepository;
 
-	public AdminsServicesImpl(AdminRepository adminRepository) {
+	public AdminsServiceImpl(AdminRepository adminRepository) {
 		super();
 		this.adminRepository = adminRepository;
 	}

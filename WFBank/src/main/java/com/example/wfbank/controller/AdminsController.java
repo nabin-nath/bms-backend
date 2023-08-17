@@ -15,17 +15,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.wfbank.model.Admins;
-import com.example.wfbank.service.impl.AdminsServicesImpl;
+import com.example.wfbank.service.impl.AdminsServiceImpl;
 
 
 @RestController
 @RequestMapping("/api/admin")
 public class AdminsController {
 	
-	@Autowired private AdminsServicesImpl adminService;
+	@Autowired private AdminsServiceImpl adminService;
 	
 	
-	public AdminsController(AdminsServicesImpl adminService) {
+	public AdminsController(AdminsServiceImpl adminService) {
 		super();
 		this.adminService = adminService;
 	}
