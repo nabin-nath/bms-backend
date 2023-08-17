@@ -32,19 +32,24 @@ public class UserController {
 	@Autowired private AccountsService accountService;
 	private ObjectMapper objectMapper;
 	
-	public UserController(UserService UserService) {
+	public UserController(UserService UserService, AccountsService accountService) {
 		super();
 		this.UserService = UserService;
+		this.accountService = accountService;
 		objectMapper = new ObjectMapper();
 		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 	}
 	
 	// build create account REST API
 	@PostMapping()
-	public ResponseEntity<String> saveUser(@RequestBody JsonNode jsonNode) throws JsonMappingException, JsonProcessingException{
+	public ResponseEntity<String> saveUser(@RequestBody JsonNode jsonNode) throws JsonMappingException, JsonProcessingException, 
+	Exception{
 //		JsonNode jsonNode = objectMapper.readTree(requestBody);
 		long userId;
 		try {
+			if(!jsonNode.has("accNumber")) {
+				throw new Exception("accNumber not given");
+			}
 			Accounts account = accountService.getAccountsById(jsonNode.get("accNumber").asLong());
 			User user = objectMapper.treeToValue(jsonNode, User.class);
 			user.setAccount(account);
@@ -53,7 +58,7 @@ public class UserController {
 		catch (Exception e) {
 			return new ResponseEntity<>("Error Message "+e.getMessage(),HttpStatus.BAD_REQUEST);
 		}
-			return new ResponseEntity<>("User Created Succesfully \nUser Id is "+userId, HttpStatus.CREATED);
+		return new ResponseEntity<>("User Created Succesfully \nUser Id is "+userId, HttpStatus.CREATED);
 	}
 	
 	// build get all User REST API
