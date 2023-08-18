@@ -52,5 +52,9 @@ public class AccountsServiceImpl implements AccountsService {
 				()-> new ResourceNotFoundException("Accounts", "Id", id));
 		accountsRepository.deleteById(id);
 	}
+	
+	public boolean existsById(long id) {
+		return accountsRepository.existsById(id);
+	}
 
 }
