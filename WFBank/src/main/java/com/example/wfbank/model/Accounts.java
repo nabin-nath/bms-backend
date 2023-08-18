@@ -94,4 +94,7 @@ public class Accounts {
 	private BigDecimal balance;
 	
 	private Boolean approved = false;
+	
+//	@OneToOne(mappedBy = "account" )
+//	private User netBank;
 }

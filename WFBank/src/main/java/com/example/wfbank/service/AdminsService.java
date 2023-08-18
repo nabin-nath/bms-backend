@@ -1,10 +1,6 @@
 package com.example.wfbank.service;
 
 import java.util.List;
-
-import com.example.wfbank.model.Accounts;
-
-import java.util.List;
 import com.example.wfbank.model.Admins;
 
 public interface AdminsService {

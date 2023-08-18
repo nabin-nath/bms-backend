@@ -1,10 +1,9 @@
 package com.example.wfbank.controller;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -62,21 +61,34 @@ public class UserController {
 	}
 	
 	// build get all User REST API
+	/*
 	@GetMapping
 	public List<User> getAllUser(){
 		return UserService.getAllUser();
 	}
+	*/
 
 	// build get account by id REST API
-	// http://localhost:8080/api/User/1
-	@GetMapping("{id}")
-	public ResponseEntity<User> getUserById(@PathVariable("id") long userId){
-		return new ResponseEntity<User>(UserService.getUserById(userId), HttpStatus.OK);
+	// http://localhost:8080/api/User
+	@GetMapping
+	public ResponseEntity<Object> getUserById(){
+		long userId;
+		User user;
+		try {
+			String userName = SecurityContextHolder.getContext().getAuthentication().getName();
+			userId = Long.parseLong(userName);
+			user = UserService.getUserById(userId);
+		}
+		catch (Exception e) {
+			return new ResponseEntity<Object>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+		}
+		
+		return new ResponseEntity<Object>(user, HttpStatus.OK);
 	}
 	
 	// build update account REST API
 	// http://localhost:8080/api/User/1
-	@PutMapping("{id}")
+	@PutMapping
 	public ResponseEntity<User> updateUser(@PathVariable("id") long id
 												  ,@RequestBody User user){
 		return new ResponseEntity<User>(UserService.updateUser(user, id), HttpStatus.OK);
