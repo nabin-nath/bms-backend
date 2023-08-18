@@ -11,6 +11,20 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+
+  mail:
+      host: smtp.gmail.com
+      password: oxcxpkxpbzaltkkh
+      port: 587
+      properties:
+          mail:
+              smtp:
+                  auth: true
+                  starttls:
+                      enable: true
+      username: aquibnawaz78692@gmail.com
+     
 logging:
   level:
     org.zalando.logbook: TRACE
+    

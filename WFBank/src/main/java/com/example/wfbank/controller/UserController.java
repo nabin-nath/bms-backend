@@ -20,6 +20,8 @@ import com.example.wfbank.model.Accounts;
 import com.example.wfbank.model.User;
 import com.example.wfbank.service.AccountsService;
 import com.example.wfbank.service.UserService;
+import com.example.wfbank.service.impl.OtpService;
+import com.example.wfbank.util.OtpGenerator;
 import com.example.wfbank.util.Validator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -34,14 +36,16 @@ public class UserController {
 	@Autowired private UserService UserService;
 	@Autowired private AccountsService accountService;
 	@Autowired private BCryptPasswordEncoder passwordEncoder;
+	@Autowired private OtpService otpService;
 	private ObjectMapper objectMapper;
 	
 	public UserController(UserService UserService, AccountsService accountService,
-			BCryptPasswordEncoder encoder) {
+			BCryptPasswordEncoder encoder, OtpService otpService) {
 		super();
 		this.UserService = UserService;
 		this.accountService = accountService;
 		this.passwordEncoder = encoder;
+		this.otpService = otpService;
 		objectMapper = new ObjectMapper();
 		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 	}
@@ -71,15 +75,8 @@ public class UserController {
 		return new ResponseEntity<>("User Created Succesfully \nUser Id is "+userId, HttpStatus.CREATED);
 	}
 	
-	// build get all User REST API
-	/*
-	@GetMapping
-	public List<User> getAllUser(){
-		return UserService.getAllUser();
-	}
-	*/
 
-	// build get account by id REST API
+	// build get current user detail REST API
 	// http://localhost:8080/api/User
 	@GetMapping
 	public ResponseEntity<Object> getUserById(){
@@ -137,15 +134,34 @@ public class UserController {
 		return new ResponseEntity<String>("User deleted successfully!.", HttpStatus.OK);
 	}
 	
-	@GetMapping("/{id}")
-	public ResponseEntity<Map<String, String>> getUserId(@PathVariable("id")long id){
+	@GetMapping("/id")
+	public ResponseEntity<Map<String, String>> getUserId(@RequestBody JsonNode jsonNode){
 		Map<String,String> mp =new HashMap<>();
 		HttpStatus status = HttpStatus.BAD_REQUEST;
+		long id;
+		Integer otp;
+		
+		try {
+			id = jsonNode.get("accNumber").asLong();
+			otp = Integer.parseInt(jsonNode.get("otp").asText());
+		}
+		catch (Exception e) {
+			mp.put("message", "Invalid Account Number or OTP");
+			return new ResponseEntity<>(mp,status);
+		}
+		
 		if(accountService.existsById(id)) {
 			try {
 				long retId = UserService.findByAccount(id);
-				mp.put("id", Long.toString(retId));
-				status = HttpStatus.OK;
+				boolean validated = otpService.validateOTP(Long.toString(retId), otp);
+				if(validated) {
+					mp.put("id", Long.toString(retId));
+					status = HttpStatus.OK;
+				}
+				else {
+					mp.put("message", "Otps Does Not Match");
+				}
+					
 			}
 			catch (Exception e) {
 				mp.put("message", e.getMessage());
@@ -155,5 +171,28 @@ public class UserController {
 			mp.put("message", "Account Number Does Not Exist");
 		}
 		return new ResponseEntity<>(mp, status);
+	}
+	
+	@GetMapping("/otp-gen")
+	public ResponseEntity<Map<String,String>> generateOtp(@RequestBody JsonNode jsonNode){
+		Map<String, String>mp = new HashMap<>();
+		HttpStatus status = HttpStatus.BAD_REQUEST;
+		long id;
+		try {
+			id = jsonNode.get("accNumber").asLong();
+			if(!accountService.existsById(id)) {
+				throw new Exception();
+			}
+			long userId = UserService.findByAccount(id);
+			String mail = accountService.getAccountsById(id).getEmail();
+			otpService.generateOtp(mail, userId);
+		}
+		catch (Exception e) {
+			mp.put("message", "Invalid Account Number");
+			return new ResponseEntity<>(mp,status);
+		}
+		mp.put("message", "OTP Sent to mail " );
+		return new ResponseEntity<>(mp,HttpStatus.OK);
+		
 	}
 }

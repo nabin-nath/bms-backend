@@ -66,5 +66,10 @@ public class UserServiceImpl implements UserService {
 		return UserRepository.findByAccountAccNumber(id).getUserId();
 	}
 
+	@Override
+	public User findUserByAccount(long id) {
+		return UserRepository.findByAccountAccNumber(id);
+	}
+
 }
 
