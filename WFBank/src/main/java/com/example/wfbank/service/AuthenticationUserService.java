@@ -5,6 +5,7 @@ import java.util.Collection;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -24,8 +25,8 @@ public class AuthenticationUserService implements UserDetailsService {
     @Override public UserDetails loadUserByUsername(String IdType) throws UsernameNotFoundException {
         //userId:role
 		
-    	String [] arr = IdType.split(":");
-		String userId = arr[0], userType = arr[1], password;
+    	int idx = IdType.lastIndexOf(":");
+		String userId = IdType.substring(0,idx), userType = IdType.substring(idx+1), password;
 		try {
 			
 			if (userType.equals(USER)) {
@@ -45,7 +46,7 @@ public class AuthenticationUserService implements UserDetailsService {
 			
             throw new UsernameNotFoundException(userId);
         }
-        return new org.springframework.security.core.userdetails.User(userId, password, getAuthorities(userType));
+        return new User(userId, password, getAuthorities(userType));
     }
     
     

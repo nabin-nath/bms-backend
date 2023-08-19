@@ -21,7 +21,6 @@ import com.example.wfbank.model.User;
 import com.example.wfbank.service.AccountsService;
 import com.example.wfbank.service.UserService;
 import com.example.wfbank.service.impl.OtpService;
-import com.example.wfbank.util.OtpGenerator;
 import com.example.wfbank.util.Validator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -52,34 +51,51 @@ public class UserController {
 	
 	// build create account REST API
 	@PostMapping()
-	public ResponseEntity<String> saveUser(@RequestBody JsonNode jsonNode) throws JsonMappingException, JsonProcessingException, 
+	public ResponseEntity<Map<String,String>> saveUser(@RequestBody JsonNode jsonNode) throws JsonMappingException, JsonProcessingException, 
 	Exception{
 //		JsonNode jsonNode = objectMapper.readTree(requestBody);
 		long userId;
+		Map<String,String> mp = new HashMap<>();
 		try {
-			if(!jsonNode.has("accNumber")) {
-				throw new Exception("accNumber not given");
-			}
+			String [] fields = {"accNumber", "password", "pin", "confirmPassword", "confirmPin", "otp"}; 
+			if(!Validator.nonNullFieldsValidator(jsonNode, fields))
+				throw new Exception("Fields cant be empty");
+			Integer otp = Integer.valueOf(jsonNode.get("otp").asInt());
 			Accounts account = accountService.getAccountsById(jsonNode.get("accNumber").asLong());
-			if(!Validator.nonNullValidator(jsonNode.get("password")) ||
-					!Validator.nonNullValidator(jsonNode.get("pin"))) {
-				throw new Exception("Password and Null cant be empty");
+			String password = jsonNode.get("password").asText(), 
+					confirmPassword = jsonNode.get("confirmPassword").asText(), pin = jsonNode.get("pin").asText(),
+					confirmPin = jsonNode.get("confirmPin").asText();
+			
+			if(!password.equals(confirmPassword) || !pin.equals(confirmPin)) {
+				throw new Exception("Password and pin must match with confirmation");
 			}
+			
+			if(UserService.existByAccount(account.getAccNumber())) {
+				throw new Exception("User For this Account Already Registered");
+			}
+			
+			if(!otpService.validateOTP(jsonNode.get("accNumber").asText()+":create", otp));
+			
 			User user = objectMapper.treeToValue(jsonNode, User.class);
 			user.setAccount(account);
+			user.setPassword(passwordEncoder.encode(password));
+			user.setPin(passwordEncoder.encode(pin));
 			userId = UserService.saveUser(user).getUserId();
+			mp.put("userId", Long.toString(userId));
+			mp.put("message", "User Id Created for given Account Number");
 		}
 		catch (Exception e) {
-			return new ResponseEntity<>("Error Message "+e.getMessage(),HttpStatus.BAD_REQUEST);
+			mp.put("message", e.getMessage());
+			return new ResponseEntity<>(mp,HttpStatus.BAD_REQUEST);
 		}
-		return new ResponseEntity<>("User Created Succesfully \nUser Id is "+userId, HttpStatus.CREATED);
+		return new ResponseEntity<>(mp, HttpStatus.CREATED);
 	}
 	
 
 	// build get current user detail REST API
 	// http://localhost:8080/api/User
 	@GetMapping
-	public ResponseEntity<Object> getUserById(){
+	public ResponseEntity<Object> getUser(){
 		User user;
 		try {
 			user = UserService.getCurrentUser();
@@ -105,6 +121,8 @@ public class UserController {
 				if(password.equals(confirmPassword)) {
 					user.setPassword(passwordEncoder.encode(password));
 				}
+				else
+					throw new Exception("Password and Confirm Password Does Not match");
 			}
 			
 			if(Validator.nonNullValidator(jsonNode.get("pin"))) {
@@ -113,6 +131,8 @@ public class UserController {
 				if(password.equals(confirmPassword)) {
 					user.setPin(passwordEncoder.encode(password));
 				}
+				else
+					throw new Exception("Pin and Confirm Pin Does Not match");
 			}
 			return new ResponseEntity<Object>(UserService.saveUser(user), HttpStatus.OK);
 		}
@@ -123,6 +143,46 @@ public class UserController {
 		
 	}
 	
+	
+	@PutMapping("/forget-password")
+	public ResponseEntity<Map<String,String>> forgetPassword(@RequestBody JsonNode jsonNode){
+		User user;
+		Map<String,String> mp = new HashMap<>();
+		try{
+			if(!jsonNode.has("userId"))
+				throw new Exception ("id not provided");
+			long id = jsonNode.get("userId").asLong();
+			user = UserService.getUserById(id);
+			if(user==null)
+				throw new Exception("user with given id does not exist");
+			Integer otp = Integer.parseInt(jsonNode.get("otp").asText());
+			long accNumber = user.getAccount().getAccNumber();
+			boolean validated = otpService.validateOTP(Long.toString(accNumber)+":update", otp);
+			if(!validated)
+				throw new Exception("OTP does not match");
+			
+			if(Validator.nonNullValidator(jsonNode.get("password"))) {
+				String password = jsonNode.get("password").asText();
+				String confirmPassword = jsonNode.get("confirmPassword").asText();
+				if(password.equals(confirmPassword)) {
+					user.setPassword(passwordEncoder.encode(password));
+					UserService.saveUser(user);
+				}
+				else
+					throw new Exception("Password and Confirm Password Does Not match");
+			}
+			else
+				throw new Exception("Password Can't Be empty");
+			mp.put("message", "Password Reset Successful");
+			return new ResponseEntity<>(mp, HttpStatus.OK);
+		}
+		
+		catch (Exception e) {
+			mp.put("message",e.getMessage());
+			return new ResponseEntity<>(mp, HttpStatus.BAD_REQUEST);
+		}
+		
+	}
 	// build delete account REST API
 	// http://localhost:8080/api/User/1
 	@DeleteMapping("{id}")
@@ -135,7 +195,7 @@ public class UserController {
 	}
 	
 	@GetMapping("/id")
-	public ResponseEntity<Map<String, String>> getUserId(@RequestBody JsonNode jsonNode){
+	public ResponseEntity<Map<String, String>> getUserAccNumber(@RequestBody JsonNode jsonNode){
 		Map<String,String> mp =new HashMap<>();
 		HttpStatus status = HttpStatus.BAD_REQUEST;
 		long id;
@@ -153,7 +213,7 @@ public class UserController {
 		if(accountService.existsById(id)) {
 			try {
 				long retId = UserService.findByAccount(id);
-				boolean validated = otpService.validateOTP(Long.toString(retId), otp);
+				boolean validated = otpService.validateOTP(Long.toString(id)+":find", otp);
 				if(validated) {
 					mp.put("id", Long.toString(retId));
 					status = HttpStatus.OK;
@@ -173,22 +233,28 @@ public class UserController {
 		return new ResponseEntity<>(mp, status);
 	}
 	
-	@GetMapping("/otp-gen")
-	public ResponseEntity<Map<String,String>> generateOtp(@RequestBody JsonNode jsonNode){
+	@GetMapping("/otp-gen/{type}")
+	public ResponseEntity<Map<String,String>> generateOtp(@RequestBody JsonNode jsonNode,
+			@PathVariable("type") String type){
 		Map<String, String>mp = new HashMap<>();
 		HttpStatus status = HttpStatus.BAD_REQUEST;
 		long id;
 		try {
-			id = jsonNode.get("accNumber").asLong();
-			if(!accountService.existsById(id)) {
-				throw new Exception();
+			if(type.equals("update")) {
+				long userId = jsonNode.get("userId").asLong();
+				id = UserService.getUserById(userId).getAccount().getAccNumber();
 			}
-			long userId = UserService.findByAccount(id);
+			else {
+				id = jsonNode.get("accNumber").asLong();
+				if(!accountService.existsById(id)) {
+					throw new Exception();
+				}
+			}
 			String mail = accountService.getAccountsById(id).getEmail();
-			otpService.generateOtp(mail, userId);
+			otpService.generateOtp(mail, Long.toString(id)+":"+type);
 		}
 		catch (Exception e) {
-			mp.put("message", "Invalid Account Number");
+			mp.put("message", "Invalid Credentials Given");
 			return new ResponseEntity<>(mp,status);
 		}
 		mp.put("message", "OTP Sent to mail " );

@@ -3,7 +3,6 @@ package com.example.wfbank.service.impl;
 import java.util.List;
 
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.wfbank.exception.ResourceNotFoundException;
@@ -18,13 +17,10 @@ import lombok.RequiredArgsConstructor;
 public class UserServiceImpl implements UserService {
 
 	private final UserRepository UserRepository;
-	private final BCryptPasswordEncoder passwordEncoder;
 	
 	@Override
 	public User saveUser(User user) {
 		// TODO Auto-generated method stub
-		user.setPassword(passwordEncoder.encode(user.getPassword()));
-		user.setPin(passwordEncoder.encode(user.getPin()));
 		return UserRepository.save(user);
 	}
 
@@ -69,6 +65,12 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public User findUserByAccount(long id) {
 		return UserRepository.findByAccountAccNumber(id);
+	}
+
+	@Override
+	public boolean existByAccount(long id) {
+		// TODO Auto-generated method stub
+		return UserRepository.existsByAccountAccNumber(id);
 	}
 
 }

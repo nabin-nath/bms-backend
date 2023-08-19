@@ -4,4 +4,5 @@ import com.example.wfbank.model.User;
 
 public interface UserRepository extends JpaRepository<User, Long>{
 	User findByAccountAccNumber(long accNumber);
+	boolean existsByAccountAccNumber(long accNumber);
 }

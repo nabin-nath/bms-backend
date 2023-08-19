@@ -14,4 +14,5 @@ public interface UserService {
 	User updateUser(User user);
 	long findByAccount(long id);
 	User findUserByAccount(long id);
+	boolean existByAccount(long id);
 }

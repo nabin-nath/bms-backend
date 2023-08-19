@@ -37,13 +37,14 @@ public class OtpService {
     /**
      * Method for generate OTP number
      *
-     * @param key - provided key (username in this case)
+     * @param userEmail - email of User
+     * @param user - provided key (accNumber in this case)
      * @return boolean value (true|false)
      */
-    public Boolean generateOtp(String userEmail, long userId)
+    public Boolean generateOtp(String userEmail, String user)
     {
         // generate otp
-        Integer otpValue = otpGenerator.generateOTP(Long.toString(userId));
+        Integer otpValue = otpGenerator.generateOTP(user);
         if (otpValue == -1)
         {
             LOGGER.error("OTP generator is not working...");
@@ -56,11 +57,11 @@ public class OtpService {
         
         List<String> recipients = new ArrayList<>();
         recipients.add(userEmail);
-
+        String type = user.substring(user.lastIndexOf(":")+1);
         // generate email object
         Email email = new Email();
         email.setSubject("Spring Boot OTP Password.");
-        email.setBody("OTP Password: " + otpValue);
+        email.setBody(String.format("OTP Password for %s: %d",type, otpValue));
         email.setRecipients(recipients);
 
         // send generated e-mail
