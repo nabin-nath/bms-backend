@@ -1,6 +1,8 @@
 package com.example.wfbank.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -41,43 +43,42 @@ public class AccountsController {
 	
 	// build create account REST API
 	@PostMapping()
-	public ResponseEntity<String> saveAccounts(@RequestBody JsonNode jsonNode){
+	public ResponseEntity<Map<String,String>> saveAccounts(@RequestBody JsonNode jsonNode){
 		long accNumber;
+		Map<String,String>mp = new HashMap<>();
 		try {
 			
 			JsonNode sameAsResident = jsonNode.get("permanentSameAsResident");
 			Accounts account = objectMapper.convertValue(jsonNode, Accounts.class);
 			
 			if(!Validator.nonNullFieldsValidator(jsonNode.get("residentAddress"), Address.getNonNullFields())) {
-				return new ResponseEntity<>("Bad resident Address Data", HttpStatus.BAD_REQUEST);
+				throw new Exception("Bad residentAddress");
 			}
 			
-			if(!Validator.nonNullFieldsValidator(jsonNode.get("occupationDetails"), JobDetail.getNonNullFields())) {
-				return new ResponseEntity<>("Bad Job Details Data", HttpStatus.BAD_REQUEST);
+			else if(!Validator.nonNullFieldsValidator(jsonNode.get("occupationDetails"), JobDetail.getNonNullFields())) {
+				throw new Exception("Bad occupationAddress");
 			}
 			
-			if(!Validator.dateFormatValidator(jsonNode.get("dob"))) {
-				return new ResponseEntity<>("Bad DOB Format", HttpStatus.BAD_REQUEST);
+			else if(!Validator.dateFormatValidator(jsonNode.get("dob"))) {
+				throw new Exception("Bad dob");
 			}
 			
-			if(!Validator.nonNullFieldsValidator(jsonNode.get("residentAddress"), Address.getNonNullFields())) {
-				return new ResponseEntity<>("Bad resident Address Data", HttpStatus.BAD_REQUEST);
-			}
-			
-			if (sameAsResident !=null && !sameAsResident.isNull() && sameAsResident.asBoolean()) {
+			else if (sameAsResident !=null && !sameAsResident.isNull() && sameAsResident.asBoolean()) {
 				account.setPermanentAddress(account.getResidentAddress());
 			}
 			
 			else {
 				if(!Validator.nonNullFieldsValidator(jsonNode.get("permanentAddress"), Address.getNonNullFields())) {
-					return new ResponseEntity<>("Bad permanent Address Data", HttpStatus.BAD_REQUEST);
+					throw new Exception("Bad PermanentAddress");
 				}
 			}
 			accNumber = accountService.saveAccounts(account).getAccNumber();
+			mp.put("accNumber", Long.toString(accNumber));
 		}
 		
 		catch(Exception e) {
-			return new ResponseEntity<>("Bad Form Data\n"+e.getMessage(), HttpStatus.BAD_REQUEST);
+			mp.put("message", e.getMessage());
+			return new ResponseEntity<>(mp, HttpStatus.BAD_REQUEST);
 		}
 		
 		
@@ -89,8 +90,7 @@ public class AccountsController {
 //			
 //			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 //		}
-		return new ResponseEntity<>(String.format("Account Created Succesfully\n Account Number :%d ", accNumber),
-				HttpStatus.CREATED);
+		return new ResponseEntity<>(mp, HttpStatus.CREATED);
 	}
 	
 	// build get all accounts REST API
@@ -109,9 +109,20 @@ public class AccountsController {
 	// build update account REST API
 	// http://localhost:8080/api/accounts/1
 	@PutMapping("{id}")
-	public ResponseEntity<Accounts> updateAccounts(@PathVariable("id") long id
-												  ,@RequestBody Accounts account){
-		return new ResponseEntity<Accounts>(accountService.updateAccounts(account, id), HttpStatus.OK);
+	public ResponseEntity<Map<String,String>> approveAccounts(@PathVariable("id") long id){
+		Map<String, String> mp = new HashMap<>();
+		mp.put("accNumber", Long.toString(id));
+		try {
+			Accounts account = accountService.getAccountsById(id);
+			account.setApproved(true);
+			accountService.saveAccounts(account);
+			mp.put("message", "Account Approved");
+		}
+		catch (Exception e){
+			mp.put("message", "Account Does Not exist");
+			new ResponseEntity<>(mp, HttpStatus.BAD_REQUEST);
+		}
+			return new ResponseEntity<>(mp, HttpStatus.OK);
 	}
 	
 	// build delete account REST API
@@ -120,9 +131,13 @@ public class AccountsController {
 	public ResponseEntity<String> deleteAccounts(@PathVariable("id") long id){
 		
 		// delete account from DB
-		accountService.deleteAccounts(id);
-		
-		return new ResponseEntity<String>("Accounts deleted successfully!.", HttpStatus.OK);
+		try {
+			accountService.deleteAccounts(id);
+			return new ResponseEntity<String>("Accounts deleted successfully!.", HttpStatus.OK);
+		}
+		catch (Exception e){
+			return new ResponseEntity<String>("Accounts does not exist!.", HttpStatus.BAD_REQUEST);
+		}
 	}
 	
 }

@@ -74,7 +74,8 @@ public class UserController {
 				throw new Exception("User For this Account Already Registered");
 			}
 			
-			if(!otpService.validateOTP(jsonNode.get("accNumber").asText()+":create", otp));
+			if(!otpService.validateOTP(jsonNode.get("accNumber").asText()+":create", otp))
+				throw new Exception("Otp Does Not Match");
 			
 			User user = objectMapper.treeToValue(jsonNode, User.class);
 			user.setAccount(account);
@@ -194,7 +195,7 @@ public class UserController {
 		return new ResponseEntity<String>("User deleted successfully!.", HttpStatus.OK);
 	}
 	
-	@GetMapping("/id")
+	@PostMapping("/id")
 	public ResponseEntity<Map<String, String>> getUserAccNumber(@RequestBody JsonNode jsonNode){
 		Map<String,String> mp =new HashMap<>();
 		HttpStatus status = HttpStatus.BAD_REQUEST;
@@ -233,7 +234,7 @@ public class UserController {
 		return new ResponseEntity<>(mp, status);
 	}
 	
-	@GetMapping("/otp-gen/{type}")
+	@PostMapping("/otp-gen/{type}")
 	public ResponseEntity<Map<String,String>> generateOtp(@RequestBody JsonNode jsonNode,
 			@PathVariable("type") String type){
 		Map<String, String>mp = new HashMap<>();
