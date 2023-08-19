@@ -27,7 +27,7 @@ public class AuthenticationUserService implements UserDetailsService {
     	String [] arr = IdType.split(":");
 		String userId = arr[0], userType = arr[1], password;
 		try {
-			System.out.println(IdType+userType + userId);
+			
 			if (userType.equals(USER)) {
 				
 				password = userService.getUserById(Long.parseLong(userId)).getPassword();
