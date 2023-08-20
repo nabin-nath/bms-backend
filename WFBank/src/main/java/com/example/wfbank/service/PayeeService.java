@@ -10,4 +10,5 @@ public interface PayeeService {
 	Payee getPayeeById(long id);
 	Payee updatePayee(Payee payee, long id);
 	void deletePayee(long id);
+	List<Payee> getPayeesByAccNumber(long accNumber);
 }
