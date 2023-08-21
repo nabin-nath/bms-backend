@@ -10,4 +10,6 @@ public interface AccountsService {
 	Accounts getAccountsById(long id);
 	Accounts updateAccounts(Accounts Accounts, long id);
 	void deleteAccounts(long id);
+	boolean existsById(long id);
+	List<Accounts> getUnapprovedAccounts();
 }

@@ -1,33 +1,116 @@
+http://localhost:8081/api/accounts
+give permanentAddress if not same
+Any body Can post
 {
-"aadhar": 123456,
+"aadhar": "123456",
 "balance": 90.0,
 "debitCardRequired": true,
 "dob": "2023-01-01",
-"email": "a@b.com",
+"email": "a@b",
 "fatherName": "name",
 "firstName": "Aquib", 
 "lastName": "name",
 "middleName": "name",
-"mobile": 23455,
+"mobile": 234566,
 "netBankingRequired": true,
 "occupationDetails": {
     "occupationType": "we",
     "sourceOfIncome": "none",
     "grossAnnualIncome": 1000
 },
-"permanentAddress": {
-    "line1": "line",
-    "line2": "line",
-    "city": "Mumbai",
-    "pinCode": 234353
-},
+"permanentSameAsResident":true,
 "residentAddress": {
-    "line1": "line",
+    "line1": "line1",
     "line2": "line3",
     "city": "Mumbai",
     "pinCode": 234353
 },
 "title": "a"
 
-
 }
+return 201 on success
+
+To Create User
+Generate Otp first
+GET http://localhost:8081/api/user/otp-gen/create
+{
+    "accNumber":1
+}
+return 200 on success
+
+Mail will go to email given while creating account
+OTP is printed on console too for info with that otp
+
+POST http://localhost:8081/api/user
+{
+    "username":"Aditya Bengali",
+    "password":"bel",
+    "confirmPassword":"bel",
+    "pin":"1234",
+    "confirmPin":"1234",
+    "accNumber": 1,
+    "otp": 956134
+}
+return 201 on succes
+
+For login
+
+POST http://localhost:8081/login
+{
+    "userId": 3,
+    "password": "el1",
+    "role": "USER"
+}
+return Authorizaion token
+Send it on header whenever you want to make a request where user is logged in
+
+GET http://localhost:8081/api/user
+send authorization token in header
+return info about currently logged in user
+
+For Finding UserId from Account Number
+Generate Otp first
+GET http://localhost:8081/api/user/otp-gen/find
+{
+    "accNumber":1
+}
+return 200 on success
+
+then with otp send
+POST http://localhost:8081/api/user/id
+{
+    "accNumber":1,
+    "otp":213226
+}
+return userId 
+
+if you forget password
+Generate Otp first Check That userId is used and not account number
+POST http://localhost:8081/api/user/otp-gen/update
+{
+    "userId":1
+}
+otp will be send on account corresponding to user' account
+return 200 on success
+
+then with otp send
+PUT http://localhost:8081/api/user/forget-password
+{
+    "userId":1,
+    "otp":940734,
+    "password":"el1",
+    "confirmPassword": "el1"
+}
+
+NOTE:- 
+You can change .anyRequest().authenticated() => .anyRequest().permitAll() 
+in SecurityConfiguration.java file in wfbank.config package
+
+GET http://localhost:8081/api/accounts
+get all unapproced accounts
+
+PUT http://localhost:8081/api/accounts/1
+Approve Account
+
+DELETE http://localhost:8081/api/accounts/1
+delete request
