@@ -48,6 +48,17 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        catch (Exception e) {
+        	response.setContentType("application/json");
+        	response.setCharacterEncoding("UTF-8");
+        	try {
+        		response.getWriter().write("{\"message\":\""+e.getMessage()+"\"}");
+        		throw new RuntimeException(e);
+        	} catch(IOException et) {
+        		throw new RuntimeException (et);
+        	}
+        	
+        }
     }
 
     @Override protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication auth) throws IOException, ServletException {

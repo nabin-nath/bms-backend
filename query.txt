@@ -77,7 +77,7 @@ GET http://localhost:8081/api/user/otp-gen/find
 return 200 on success
 
 then with otp send
-GET http://localhost:8081/api/user/id
+POST http://localhost:8081/api/user/id
 {
     "accNumber":1,
     "otp":213226
@@ -86,7 +86,7 @@ return userId
 
 if you forget password
 Generate Otp first Check That userId is used and not account number
-GET http://localhost:8081/api/user/otp-gen/update
+POST http://localhost:8081/api/user/otp-gen/update
 {
     "userId":1
 }
@@ -105,3 +105,12 @@ PUT http://localhost:8081/api/user/forget-password
 NOTE:- 
 You can change .anyRequest().authenticated() => .anyRequest().permitAll() 
 in SecurityConfiguration.java file in wfbank.config package
+
+GET http://localhost:8081/api/accounts
+get all unapproced accounts
+
+PUT http://localhost:8081/api/accounts/1
+Approve Account
+
+DELETE http://localhost:8081/api/accounts/1
+delete request

@@ -101,7 +101,7 @@ public class AccountsController {
 	// build get all accounts REST API
 	@GetMapping
 	public List<Accounts> getAllAccounts(){
-		return accountService.getAllAccounts();
+		return accountService.getUnapprovedAccounts();
 	}
 	
 	// build get account by id REST API

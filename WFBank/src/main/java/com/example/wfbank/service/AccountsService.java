@@ -11,4 +11,5 @@ public interface AccountsService {
 	Accounts updateAccounts(Accounts Accounts, long id);
 	void deleteAccounts(long id);
 	boolean existsById(long id);
+	List<Accounts> getUnapprovedAccounts();
 }
