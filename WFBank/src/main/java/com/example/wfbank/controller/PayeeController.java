@@ -48,12 +48,9 @@ public class PayeeController {
 	@PostMapping()
 	public ResponseEntity<String> savePayee(@RequestBody JsonNode jsonNode) throws JsonMappingException, JsonProcessingException{
 //		JsonNode jsonNode = objectMapper.readTree(requestBody);
-		long userId;
 		User user;
 		try {
-			String userName = SecurityContextHolder.getContext().getAuthentication().getName();
-			userId = Long.parseLong(userName);
-			user = userService.getUserById(userId);
+			user = userService.getCurrentUser();
 		}
 		catch (Exception e) {
 			return new ResponseEntity<String>(e.getMessage(), HttpStatus.UNAUTHORIZED);
@@ -66,7 +63,7 @@ public class PayeeController {
 			}
 			Payee payee = objectMapper.treeToValue(jsonNode, Payee.class);
 			payee.setAccount(account);
-			payeeId = payeeService.savePayee(payee).getPayeeId();
+			payeeId = payeeService.savePayee(payee).getId();
 		}
 		catch (Exception e) {
 			return new ResponseEntity<>("Error Message "+e.getMessage(),HttpStatus.BAD_REQUEST);
@@ -80,8 +77,9 @@ public class PayeeController {
 		return payeeService.getAllPayee();
 	}
 	
-	@GetMapping("accNumber/{accNumber}")
-	public ResponseEntity<List<Payee>> getPayeesByAccNumber (@PathVariable long accNumber){
+	@GetMapping("accNumber")
+	public ResponseEntity<List<Payee>> getPayeesByAccNumber (){
+		long accNumber = userService.getCurrentUser().getAccount().getAccNumber();
 		List<Payee> payees = payeeService.getPayeesByAccNumber(accNumber);
 		if(payees.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
