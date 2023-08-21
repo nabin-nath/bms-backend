@@ -1,0 +1,47 @@
+For payee creation
+POST http://localhost:8081/api/payee
+Only Account holder can post and he has to login first
+{
+    "beneficiaryName": "vcfhbadkjvbad",
+    "beneficiaryAccNumber": 3,
+    "nickname": "awdvjhfvawvb"
+}
+return 201 on successful creation
+accNumber is automatically added by checking the logged in user
+also the beneficiary account is mandatory to be present in the bank.
+Invalid beneficiary account number will through an error on posting.
+
+To get all the payees
+(Only for Admin access)
+(Note: Backend can not access roles hence the full implementation with checks is pending)
+GET http://localhost:8081/api/payee
+return 200 on success with list of all the payees linked with any of the account in the bank.
+
+
+To get all payees linked to an account holder
+(Only accessable by the account holder when he is logged in)
+GET http://localhost:8081/api/payee/accNumber
+return 200 on success with list of all payees linked to the logged in account number.
+
+To get a specific payee
+Is made to be used by the transactions table to get
+the data of a specific payee added by the user who is logged in.
+(Note: we are checking for user logged in in so user can not access a payee of another account)
+GET http://localhost:8081/api/payee/accNumber/{id}
+return 200 on success with the payee with the specified id
+
+To update a specific payee
+Only user who has added the payee can update and only when logged in.
+PUT http://localhost:8081/api/payee/accNumber/{id}
+{
+    "beneficiaryName": "vcfhbadkjvbad",
+    "beneficiaryAccNumber": 2,
+    "nickname": "recovery boy"
+}
+Again the account number is not updated and we also check if user id logged in or not.
+return 200 on updation with a message saying payee with {id} is updated
+
+To delete a specific payee
+Again only by user with the payee when he is logged in =.
+DELETE http://localhost/api/payee/accNumber/{id}
+return 200 on successful deletion with aprompt of the same.

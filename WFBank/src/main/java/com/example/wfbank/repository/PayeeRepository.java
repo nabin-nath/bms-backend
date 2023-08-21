@@ -7,5 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.example.wfbank.model.Payee;
 
 public interface PayeeRepository extends JpaRepository<Payee, Long> {
-	public List<Payee> findByAccount_AccNumber(long accNumber);
+	public List<Payee> findByAccNumber(long accNumber);
 }
