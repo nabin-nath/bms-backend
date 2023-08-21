@@ -1,6 +1,7 @@
 package com.example.wfbank.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -8,6 +9,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.example.wfbank.filter.JWTAuthenticationFilter;
 import com.example.wfbank.filter.JWTAuthorizationFilter;
@@ -18,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 @SuppressWarnings("deprecation")
 @EnableWebSecurity
 @RequiredArgsConstructor
+@Configuration
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -25,16 +28,23 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override protected void configure(HttpSecurity http) throws Exception {
     	
-        http.cors().and().csrf().disable().authorizeRequests()
+        http
+//        .cors().configurationSource(CustomCorsFilter.configurationSource()). and()
+        .csrf().disable().authorizeRequests()
+        	
             .antMatchers(HttpMethod.POST, AuthenticationConfigConstants.SIGN_UP_URL).permitAll()
             .antMatchers(HttpMethod.POST, "/api/accounts").permitAll()
             .antMatchers("/api/accounts/**").hasAuthority("ADMIN")
             .antMatchers("/api/user/**").permitAll()
+            .antMatchers("/login").permitAll()
            // .antMatchers(null)
             .anyRequest().authenticated()
             .and()
+//            .addFilter(new CustomCorsFilter())
             .addFilter(new JWTAuthenticationFilter(authenticationManager()))
             .addFilter(new JWTAuthorizationFilter(authenticationManager()))
+            .addFilterBefore(new CustomCorsFilter(), UsernamePasswordAuthenticationFilter.class)
+//            .addFilterBefore(new CorsConfigurationClass(), JWTAuthenticationFilter.class)
             // this disables session creation on Spring Security
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
     }
