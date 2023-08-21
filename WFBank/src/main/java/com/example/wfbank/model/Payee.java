@@ -7,7 +7,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
@@ -31,11 +31,8 @@ public class Payee {
 	@Column(name="nickname", nullable=true)
 	private String nickname;
 	
-	@OneToOne(cascade = CascadeType.ALL)
+	@ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "accNumber", referencedColumnName="accNumber")
 	private Accounts account;
 	
-	public long getPayeeId() {
-		return id;
-	}
 }
