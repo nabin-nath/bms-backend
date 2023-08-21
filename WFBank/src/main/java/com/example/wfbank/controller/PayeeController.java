@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,8 +18,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.wfbank.model.Accounts;
 import com.example.wfbank.model.Payee;
+import com.example.wfbank.model.User;
 import com.example.wfbank.service.AccountsService;
 import com.example.wfbank.service.PayeeService;
+import com.example.wfbank.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -31,11 +34,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class PayeeController {
 	@Autowired private PayeeService payeeService;
 	@Autowired private AccountsService accountService;
+	@Autowired private UserService userService;
 	private ObjectMapper objectMapper;
 	
-	public PayeeController(PayeeService payeeService) {
+	public PayeeController(PayeeService payeeService, UserService userService) {
 		super();
 		this.payeeService = payeeService;
+		this.userService = userService;
 		objectMapper = new ObjectMapper();
 		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 	}
@@ -43,9 +48,22 @@ public class PayeeController {
 	@PostMapping()
 	public ResponseEntity<String> savePayee(@RequestBody JsonNode jsonNode) throws JsonMappingException, JsonProcessingException{
 //		JsonNode jsonNode = objectMapper.readTree(requestBody);
+		long userId;
+		User user;
+		try {
+			String userName = SecurityContextHolder.getContext().getAuthentication().getName();
+			userId = Long.parseLong(userName);
+			user = userService.getUserById(userId);
+		}
+		catch (Exception e) {
+			return new ResponseEntity<String>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+		}
 		long payeeId;
 		try {
 			Accounts account = accountService.getAccountsById(jsonNode.get("accNumber").asLong());
+			if(account.equals(user.getAccount())==false) {
+				return new ResponseEntity<String>("Payee can only be added by the account holder", HttpStatus.BAD_REQUEST);
+			}
 			Payee payee = objectMapper.treeToValue(jsonNode, Payee.class);
 			payee.setAccount(account);
 			payeeId = payeeService.savePayee(payee).getPayeeId();
@@ -60,6 +78,15 @@ public class PayeeController {
 	@GetMapping
 	public List<Payee> getAllPayee(){
 		return payeeService.getAllPayee();
+	}
+	
+	@GetMapping("accNumber/{accNumber}")
+	public ResponseEntity<List<Payee>> getPayeesByAccNumber (@PathVariable long accNumber){
+		List<Payee> payees = payeeService.getPayeesByAccNumber(accNumber);
+		if(payees.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
+		return new ResponseEntity<>(payees, HttpStatus.OK);
 	}
 
 	// build get account by id REST API

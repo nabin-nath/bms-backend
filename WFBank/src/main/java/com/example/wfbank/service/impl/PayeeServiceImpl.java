@@ -20,7 +20,11 @@ public class PayeeServiceImpl implements PayeeService {
 		// TODO Auto-generated method stub
 		return payeeRepository.save(payee);
 	}
-
+	
+	public List<Payee> getPayeesByAccNumber(long accNumber){
+		return payeeRepository.findByAccount_AccNumber(accNumber);
+	}
+	
 	public List<Payee> getAllPayee() {
 		// TODO Auto-generated method stub
 		return payeeRepository.findAll();
