@@ -56,5 +56,10 @@ public class AccountsServiceImpl implements AccountsService {
 	public boolean existsById(long id) {
 		return accountsRepository.existsById(id);
 	}
+	
+	@Override
+	public List<Accounts> getUnapprovedAccounts(){
+		return accountsRepository.findAllByApprovedFalse();
+	}
 
 }
