@@ -29,6 +29,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Override protected void configure(HttpSecurity http) throws Exception {
     	
         http
+        .cors().and()
 //        .cors().configurationSource(CustomCorsFilter.configurationSource()). and()
         .csrf().disable().authorizeRequests()
         	
@@ -43,8 +44,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 //            .addFilter(new CustomCorsFilter())
             .addFilter(new JWTAuthenticationFilter(authenticationManager()))
             .addFilter(new JWTAuthorizationFilter(authenticationManager()))
-            .addFilterBefore(new CustomCorsFilter(), UsernamePasswordAuthenticationFilter.class)
-//            .addFilterBefore(new CorsConfigurationClass(), JWTAuthenticationFilter.class)
+//            .addFilterBefore(new CustomCorsFilter(), UsernamePasswordAuthenticationFilter.class)
             // this disables session creation on Spring Security
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
     }

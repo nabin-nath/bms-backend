@@ -9,6 +9,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -26,7 +28,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 //import lombok.RequiredArgsConstructor;
 
 public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
-
+	private final Logger LOGGER = LoggerFactory.getLogger(JWTAuthenticationFilter.class);
     private final AuthenticationManager authenticationManager;
     public JWTAuthenticationFilter(AuthenticationManager authManager){
     	super();
@@ -36,6 +38,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     
     @Override public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
         try {
+        	LOGGER.info("Attempting Login");
             JsonNode creds = new ObjectMapper()
                 .readTree(request.getInputStream());
             
