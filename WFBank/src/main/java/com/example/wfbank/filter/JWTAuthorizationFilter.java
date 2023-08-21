@@ -9,6 +9,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -20,9 +22,10 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.example.wfbank.config.AuthenticationConfigConstants;
+import com.example.wfbank.service.impl.OtpService;
 
 public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
-
+	private final Logger LOGGER = LoggerFactory.getLogger(OtpService.class);
     public JWTAuthorizationFilter(AuthenticationManager authenticationManager) {
         super(authenticationManager);
     }
@@ -58,7 +61,7 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
 
             String username = verify.getSubject();
             String role = verify.getClaim("role").asString();
-
+            LOGGER.info(role);
             if (username != null) {
                 return new UsernamePasswordAuthenticationToken(username, null, getAuthorities(role));
             }

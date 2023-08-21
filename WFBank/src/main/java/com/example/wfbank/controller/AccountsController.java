@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +23,8 @@ import com.example.wfbank.model.Accounts;
 import com.example.wfbank.model.Address;
 import com.example.wfbank.model.JobDetail;
 import com.example.wfbank.service.AccountsService;
+import com.example.wfbank.service.UserService;
+import com.example.wfbank.service.impl.OtpService;
 import com.example.wfbank.util.Validator;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -32,8 +36,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class AccountsController {
 	
 	@Autowired private AccountsService accountService;
+	@Autowired private UserService uService;
 	private ObjectMapper objectMapper;
-	
+	private final Logger LOGGER = LoggerFactory.getLogger(OtpService.class);
 	public AccountsController(AccountsService accountService) {
 		super();
 		this.accountService = accountService;
@@ -128,15 +133,20 @@ public class AccountsController {
 	// build delete account REST API
 	// http://localhost:8080/api/accounts/1
 	@DeleteMapping("{id}")
-	public ResponseEntity<String> deleteAccounts(@PathVariable("id") long id){
+	public ResponseEntity<String> deleteAccountsByAdmin(@PathVariable("id") long id){
 		
 		// delete account from DB
 		try {
+			if(accountService.getAccountsById(id).getApproved())
+				throw new Exception("Account is Already Approved");
+			uService.deleteUser(uService.findByAccount(id));
 			accountService.deleteAccounts(id);
+			
 			return new ResponseEntity<String>("Accounts deleted successfully!.", HttpStatus.OK);
 		}
 		catch (Exception e){
-			return new ResponseEntity<String>("Accounts does not exist!.", HttpStatus.BAD_REQUEST);
+			LOGGER.info(e.getMessage());
+			return new ResponseEntity<String>("Accounts does not exist or Not permiited to delete!.", HttpStatus.BAD_REQUEST);
 		}
 	}
 	

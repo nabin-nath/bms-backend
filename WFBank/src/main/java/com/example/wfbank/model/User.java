@@ -1,6 +1,5 @@
 package com.example.wfbank.model;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -34,8 +33,9 @@ public class User {
 	@Column(name="pin", nullable=false)
 	private String pin;
 	
-	@OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "accNumber", referencedColumnName="accNumber")
+	@OneToOne
+    @JoinColumn(name = "accNumber",nullable=false, 
+    	referencedColumnName="accNumber", unique=true)
 	private Accounts account;
 
 }
