@@ -37,5 +37,8 @@ public class User {
     @JoinColumn(name = "accNumber",nullable=false, 
     	referencedColumnName="accNumber", unique=true)
 	private Accounts account;
+	
+	private int failedAttempts = 0;
+	
 
 }

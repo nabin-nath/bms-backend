@@ -38,7 +38,7 @@ public class AccountsController {
 	@Autowired private AccountsService accountService;
 	@Autowired private UserService uService;
 	private ObjectMapper objectMapper;
-	private final Logger LOGGER = LoggerFactory.getLogger(OtpService.class);
+	private final Logger LOGGER = LoggerFactory.getLogger(AccountsController.class);
 	public AccountsController(AccountsService accountService) {
 		super();
 		this.accountService = accountService;

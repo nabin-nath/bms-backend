@@ -3,6 +3,9 @@ package com.example.wfbank.service;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -21,7 +24,7 @@ public class AuthenticationUserService implements UserDetailsService {
     private final AdminsService adminService;
     private static final String ADMIN = "ADMIN";
     private static final String USER = "USER";
-
+    private final Logger LOGGER = LoggerFactory.getLogger(getClass());
     @Override public UserDetails loadUserByUsername(String IdType) throws UsernameNotFoundException {
         //userId:role
 		
@@ -37,13 +40,13 @@ public class AuthenticationUserService implements UserDetailsService {
 				password = adminService.getAdminById(Long.parseLong(userId)).getPassword();
 			}
 			else {
-				throw new Exception("");
+				throw new BadCredentialsException("Unknown Role");
 			}
 			
 				
 		}
 		catch (Exception e) {
-			
+			LOGGER.error("Username Not Found");
             throw new UsernameNotFoundException(userId);
         }
         return new User(userId, password, getAuthorities(userType));
