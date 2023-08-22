@@ -2,15 +2,11 @@ package com.example.wfbank.model;
 
 import java.sql.Date;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -24,21 +20,20 @@ import lombok.NoArgsConstructor;
 @Table(name="Transaction")
 @NoArgsConstructor
 @AllArgsConstructor
-
 public class Transaction {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name="Id")
-	private long Id;
+	@Column(name="id")
+	private long id;
 	
-//	@Column(name="fromAccNo", nullable=false)
-//	private long fromAccNo;
-//	
-//	@Column(name="toAccNo", nullable=false)
-//	private long toAccNo;
+	@Column(name="fromAcc", nullable=false)
+	private long fromAcc;
 	
+	@Column(name="toAcc", nullable=false)
+	private long toAcc;
+
 	@Column(name="amount", nullable=false)
-	private String amount;
+	private long amount;
 	
 	@Column(name="transType", nullable=false)
 	private String transType;
@@ -50,11 +45,11 @@ public class Transaction {
 	@Column(name="pin", nullable=false)
 	private String pin;
 	
-	@ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(referencedColumnName="accNumber")
-	private Accounts toAcc;
-	
-	@ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(referencedColumnName="accNumber")
-	private Accounts fromAcc;
+//	@ManyToOne(cascade = CascadeType.ALL)
+//    @JoinColumn(referencedColumnName="accNumber")
+//	private Accounts toAcc;
+//	
+//	@ManyToOne(cascade = CascadeType.ALL)
+//    @JoinColumn(referencedColumnName="accNumber")
+//	private Accounts fromAcc;
 }
