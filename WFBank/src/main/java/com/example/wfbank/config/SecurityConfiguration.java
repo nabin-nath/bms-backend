@@ -36,6 +36,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             .antMatchers(HttpMethod.POST, AuthenticationConfigConstants.SIGN_UP_URL).permitAll()
             .antMatchers(HttpMethod.POST, "/api/accounts").permitAll()
             .antMatchers("/api/accounts/**").permitAll()
+            .antMatchers("/api/user").hasAuthority("USER")
             .antMatchers("/api/user/**").permitAll()
             .antMatchers("/login").permitAll()
            // .antMatchers(null)
@@ -45,6 +46,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             .addFilter(new JWTAuthenticationFilter(authenticationManager(),authenticationFailureHandler,userService))
             .addFilter(new JWTAuthorizationFilter(authenticationManager()))
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+//        http.exceptionHandling().accessDeniedHandler(new CustomAccessDeniedHandler()).and()
+//        .exceptionHandling().authenticationEntryPoint(new CustomHttp403ForbiddenEntryPoint());
+
     }
 
     @Override

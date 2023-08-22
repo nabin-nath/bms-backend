@@ -3,6 +3,8 @@ package com.example.wfbank.filter;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -11,8 +13,12 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,8 +26,10 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.example.wfbank.config.AuthenticationConfigConstants;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
 	private final Logger LOGGER = LoggerFactory.getLogger(JWTAuthorizationFilter.class);
@@ -38,15 +46,57 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
             chain.doFilter(request, response);
             return;
         }
-
-        UsernamePasswordAuthenticationToken authentication = getAuthentication(request);
-        
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+        try {
+        	UsernamePasswordAuthenticationToken authentication = getAuthentication(request);
+        	SecurityContextHolder.getContext().setAuthentication(authentication);
+            
+        } catch (TokenExpiredException e) {
+        	response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        	response.setHeader("error", "Session Expired");
+        	throw new BadCredentialsException(e.getMessage());
+    	}catch (Exception exception){
+            LOGGER.error("Error logging in : {} ", exception.getMessage());
+            response.setHeader("error",exception.getMessage());
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            Map<String,String > error = new HashMap<>();
+            error.put("message",exception.getMessage());
+            response.setContentType("application/json");
+            new ObjectMapper().writeValue(response.getOutputStream(),error);
+//            assert();
+            throw new BadCredentialsException(exception.getMessage());
+        }
         
         chain.doFilter(request, response);
     }
 
-
+   @Override
+   protected void onUnsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) {
+	   try{
+		   LOGGER.info("Authorization failed");
+		   super.onUnsuccessfulAuthentication(request, response, failed);
+		   response.setCharacterEncoding("UTF-8");
+	       response.setContentType("application/json");
+	       response.getWriter().write("{\"message\":\"Authorization failed: " + failed.getMessage()+"\"}"); // Customize the response message
+	   }catch(Exception e) {
+		
+	   }
+	   
+   }
+   
+   @Override
+   protected void onSuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,Authentication auth) {
+	   try{
+		   LOGGER.info("Authorization Succeded");
+		   super.onSuccessfulAuthentication(request, response, auth);
+		   response.setCharacterEncoding("UTF-8");
+	       response.setContentType("application/json");
+	       response.getWriter().write("{\"message\":\"Authorization succeded: " + auth.getPrincipal()+"\"}"); // Customize the response message
+	   }catch(Exception e) {
+		
+	   }
+	   
+   }
+    
     private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request) {
     	
         String token = request.getHeader(AuthenticationConfigConstants.HEADER_STRING);
@@ -60,7 +110,7 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
 
             String username = verify.getSubject();
             String role = verify.getClaim("role").asString();
-            LOGGER.info(role);
+            
             if (username != null) {
                 return new UsernamePasswordAuthenticationToken(username, null, getAuthorities(role));
             }
