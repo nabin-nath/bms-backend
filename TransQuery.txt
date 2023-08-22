@@ -1,0 +1,14 @@
+POST http://localhost:8081/api/transaction
+{
+    "fromAcc": 2,
+    "toAcc": 1,
+    "amount": 10,
+    "transType": "RTGS",
+    "timeStamp": "2027-09-07",
+    "pin": "1234"
+}
+return 201 created.
+
+GET http://localhost:8081/api/transaction
+return all the transaction.
+(Only for admin)
