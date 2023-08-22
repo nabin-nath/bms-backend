@@ -11,8 +11,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -23,6 +25,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.example.wfbank.config.AuthenticationConfigConstants;
 import com.example.wfbank.config.CustomAuthenticationFailureHandler;
+import com.example.wfbank.service.AuthenticationUserService;
 //import com.example.wfbank.model.User;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,11 +35,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 	private final Logger LOGGER = LoggerFactory.getLogger(JWTAuthenticationFilter.class);
     private final AuthenticationManager authenticationManager;
-    
-    public JWTAuthenticationFilter(AuthenticationManager authManager, CustomAuthenticationFailureHandler failureHandler){
+    private final AuthenticationUserService userService;
+    @Autowired
+    public JWTAuthenticationFilter(AuthenticationManager authManager, CustomAuthenticationFailureHandler failureHandler,
+    		AuthenticationUserService userService){
     	super();
     	setAuthenticationFailureHandler(failureHandler);
     	this.authenticationManager = authManager;
+    	this.userService = userService;
     	super.setUsernameParameter("userId");
     }
     
@@ -60,7 +66,29 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         }
         
     }
-
+    @Override
+    protected void unsuccessfulAuthentication(HttpServletRequest request,
+            HttpServletResponse response,
+            AuthenticationException failed) throws IOException, ServletException {
+    	super.unsuccessfulAuthentication(request, response, failed);
+    	String idType;
+    	int val=-2;
+    	if(failed instanceof BadCredentialsException) {
+    		try {
+	    		JsonNode creds = new ObjectMapper()
+	                .readTree(request.getInputStream());
+	            idType = creds.get("userId").asText()+":"+creds.get("role").asText();
+	            val = userService.failedLoginAttempt(idType);
+	    	}	    	
+	    	catch (Exception e) {
+	    	}
+    	}
+    	if(val>=0) {
+    		response.getWriter().write(",\"failedAttempts\":"+Integer.toString(val));
+    	}
+    	response.getWriter().write("\"}");
+    }
+    	
 
     @Override protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication auth) throws IOException, ServletException {
     	

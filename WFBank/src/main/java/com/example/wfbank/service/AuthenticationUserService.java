@@ -58,8 +58,58 @@ public class AuthenticationUserService implements UserDetailsService {
 		return new User(userId, password, true, true, true, nonLocked, getAuthorities(userType));
 	}
 
-//    public void failedLoginAttempt()
+    public int failedLoginAttempt(String IdType) {
+		int idx = IdType.lastIndexOf(":");
+		String userId = IdType.substring(0, idx), userType = IdType.substring(idx + 1);
+		int val=-1;
+		try {
 
+			if (userType.equals(USER)) {
+
+				com.example.wfbank.model.User user = userService.getUserById(Long.parseLong(userId));
+				if(user!=null && user.getFailedAttempts()<MAX_FAILED_ATTEMPT)
+					user.setFailedAttempts(user.getFailedAttempts()+1);
+				val = user.getFailedAttempts();
+				userService.saveUser(user);
+				
+			} 
+			else if (userType.equals(ADMIN)) {
+				Admins admin = adminService.getAdminById(Long.parseLong(userId));
+				if(admin!=null && admin.getFailedAttempts()<MAX_FAILED_ATTEMPT)
+					admin.setFailedAttempts(admin.getFailedAttempts()+1);
+				val = admin.getFailedAttempts();
+				adminService.saveAdmin(admin);
+			}
+		}
+		catch (Exception e){
+		}
+		return val;
+    }
+
+    public void resetLoginAttempt(String IdType) {
+		int idx = IdType.lastIndexOf(":");
+		String userId = IdType.substring(0, idx), userType = IdType.substring(idx + 1);
+		try {
+
+			if (userType.equals(USER)) {
+
+				com.example.wfbank.model.User user = userService.getUserById(Long.parseLong(userId));
+				if(user!=null )
+					user.setFailedAttempts(0);
+				userService.saveUser(user);
+			} 
+			else if (userType.equals(ADMIN)) {
+				Admins admin = adminService.getAdminById(Long.parseLong(userId));
+				if(admin!=null)// && admin.getFailedAttempts()<MAX_FAILED_ATTEMPT)
+					admin.setFailedAttempts(0);
+				adminService.saveAdmin(admin);
+			}
+		}
+		catch (Exception e){
+		}
+		
+    }
+    
 	private Collection<? extends GrantedAuthority> getAuthorities(String role) {
 		return Arrays.asList(new SimpleGrantedAuthority(role));
 	}
