@@ -1,5 +1,6 @@
 package com.example.wfbank.controller;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.wfbank.model.Accounts;
 import com.example.wfbank.model.Transaction;
 import com.example.wfbank.model.User;
 import com.example.wfbank.service.AccountsService;
@@ -53,12 +55,48 @@ public class TransactionController {
 		try {
 			long fromAcc = jsonNode.get("fromAcc").asLong();
 			long toAcc = jsonNode.get("toAcc").asLong();
+			
+			Accounts toAccount = accountsService.getAccountsById(toAcc);
+			Accounts fromAccount = user.getAccount();
+			BigDecimal amount = BigDecimal.valueOf(jsonNode.get("amount").asLong());
+			BigDecimal balance = fromAccount.getBalance();
+			String type = jsonNode.get("transType").toString();
+			
 			if(fromAcc != user.getAccount().getAccNumber()) {
 				return new ResponseEntity<String>("Transaction can be done by your account only", HttpStatus.BAD_REQUEST);
 			}
 			if(accountsService.existsById(toAcc)==false) {
 				return new ResponseEntity<String>("Transaction done to an invalid account", HttpStatus.BAD_REQUEST);
 			}
+			
+			if(type.equals("RTGS")) {
+				if((amount.compareTo(BigDecimal.valueOf(200000)) == -1)&& (amount.compareTo(BigDecimal.valueOf(1000000)) == 1)) {
+					return new ResponseEntity<String>("Transaction amount should be between 2 Lakhs and 10 Lakhs", HttpStatus.BAD_REQUEST);
+				}
+			}
+			else if(type.equals("IMPS")) {
+				if(amount.compareTo(BigDecimal.valueOf(500000)) == 1) {
+					return new ResponseEntity<String>("Transaction amount should be less than 5 Lakhs", HttpStatus.BAD_REQUEST);
+				}
+			}
+			else {
+				if(amount.compareTo(BigDecimal.valueOf(1000000)) == 1) {
+					return new ResponseEntity<String>("Transaction amount should be less than 10 Lakhs", HttpStatus.BAD_REQUEST);
+				}
+			}
+			if(amount.compareTo(balance) == 1) {
+				return new ResponseEntity<String>("Insufficent balance", HttpStatus.BAD_REQUEST);
+			}
+			
+			BigDecimal toBalance = toAccount.getBalance();
+			balance = balance.subtract(amount);
+			toBalance = toBalance.add(amount);
+			fromAccount.setBalance(toBalance);
+			toAccount.setBalance(balance);
+			accountsService.updateAccounts(fromAccount, fromAcc);
+			accountsService.updateAccounts(toAccount, toAcc);
+			
+			
 			Transaction transaction = objectMapper.treeToValue(jsonNode, Transaction.class);
 			transaction.setFromAcc(fromAcc);
 			transaction.setToAcc(toAcc);
