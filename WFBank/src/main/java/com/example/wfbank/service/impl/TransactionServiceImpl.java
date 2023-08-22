@@ -22,16 +22,22 @@ public class TransactionServiceImpl implements TransactionService{
 		return TransactionRepository.save(transaction);
 	}
 
-	@Override
-	public List<Transaction> findByUserId(long AccNo) {
-		// TODO Auto-generated method stub
-		return TransactionRepository.findByFromAccAccNumberOrToAccAccNumber(AccNo,AccNo);
-	}
+//	@Override
+//	public List<Transaction> findByUserId(long AccNo) {
+//		// TODO Auto-generated method stub
+//		return TransactionRepository.findByFromAccNumberOrToAccNumber(AccNo,AccNo);
+//	}
 
 	@Override
 	public List<Transaction> getAllTransaction() {
 		// TODO Auto-generated method stub
 		return TransactionRepository.findAll();
+	}
+
+	@Override
+	public List<Transaction> findByUserId(long AccNo) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 	

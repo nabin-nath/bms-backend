@@ -11,8 +11,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.wfbank.model.Accounts;
-import com.example.wfbank.model.Payee;
 import com.example.wfbank.model.Transaction;
 import com.example.wfbank.model.User;
 import com.example.wfbank.service.AccountsService;
@@ -32,11 +30,12 @@ public class TransactionController {
 	@Autowired private UserService userService;
 	private ObjectMapper objectMapper;
 	
-	public TransactionController(TransactionService TransactionService) {
+	public TransactionController(TransactionService TransactionService, UserService userService, AccountsService accountService) {
 		super();
 		this.TransactionService = TransactionService;
 		this.userService = userService;
-		objectMapper = new ObjectMapper();
+		this.accountsService = accountService;
+		this.objectMapper = new ObjectMapper();
 		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 	}
 	
@@ -52,14 +51,17 @@ public class TransactionController {
 		}
 		long transId;
 		try {
-			Accounts fromAccount = accountsService.getAccountsById(jsonNode.get("fromAccNumber").asLong());
-			Accounts toAccount = accountsService.getAccountsById(jsonNode.get("toAccNumber").asLong());
-			if(fromAccount.equals(user.getAccount())==false) {
+			long fromAcc = jsonNode.get("fromAcc").asLong();
+			long toAcc = jsonNode.get("toAcc").asLong();
+			if(fromAcc != user.getAccount().getAccNumber()) {
 				return new ResponseEntity<String>("Transaction can be done by your account only", HttpStatus.BAD_REQUEST);
 			}
+			if(accountsService.existsById(toAcc)==false) {
+				return new ResponseEntity<String>("Transaction done to an invalid account", HttpStatus.BAD_REQUEST);
+			}
 			Transaction transaction = objectMapper.treeToValue(jsonNode, Transaction.class);
-			transaction.setToAcc(toAccount);
-			transaction.setFromAcc(fromAccount);
+			transaction.setFromAcc(fromAcc);
+			transaction.setToAcc(toAcc);
 			transId = TransactionService.saveTransaction(transaction).getId();
 		}
 		catch (Exception e) {
