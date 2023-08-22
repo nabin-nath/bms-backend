@@ -112,4 +112,14 @@ public class TransactionController {
 	public List<Transaction> getAllTransaction(){
 		return TransactionService.getAllTransaction();
 	}
+	
+	@GetMapping("accNumber")
+	public ResponseEntity<List<Transaction>> getUsersTransaction() {
+		long accNumber = userService.getCurrentUser().getAccount().getAccNumber();
+		List<Transaction> transaction = TransactionService.findByUserId(accNumber);
+		if(transaction.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
+		return new ResponseEntity<>(transaction, HttpStatus.OK);
+	}
 }
