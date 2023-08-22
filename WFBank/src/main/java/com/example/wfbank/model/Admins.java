@@ -27,4 +27,5 @@ public class Admins {
 	private String adminName;
 	@Column(name="password", nullable=false)
 	private String password;
+	private int failedAttempts=0;
 }

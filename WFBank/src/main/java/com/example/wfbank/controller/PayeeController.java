@@ -57,12 +57,11 @@ public class PayeeController {
 		}
 		long payeeId;
 		try {
-			Accounts account = accountService.getAccountsById(jsonNode.get("accNumber").asLong());
-			if(account.equals(user.getAccount())==false) {
-				return new ResponseEntity<String>("Payee can only be added by the account holder", HttpStatus.BAD_REQUEST);
+			if(!accountService.existsById(jsonNode.get("beneficiaryAccNumber").asLong())) {
+				return new ResponseEntity<String>("Beneficiary account does not exist", HttpStatus.BAD_REQUEST);
 			}
 			Payee payee = objectMapper.treeToValue(jsonNode, Payee.class);
-			payee.setAccount(account);
+			payee.setAccNumber(user.getAccount().getAccNumber());
 			payeeId = payeeService.savePayee(payee).getId();
 		}
 		catch (Exception e) {
@@ -89,27 +88,58 @@ public class PayeeController {
 
 	// build get account by id REST API
 	// http://localhost:8080/api/Payee/1
-	@GetMapping("{id}")
+	@GetMapping("accNumber/{id}")
 	public ResponseEntity<Payee> getPayeeById(@PathVariable("id") long payeeId){
-		return new ResponseEntity<Payee>(payeeService.getPayeeById(payeeId), HttpStatus.OK);
+		try {
+			long acc = userService.getCurrentUser().getAccount().getAccNumber();
+			long acc2 = payeeService.getPayeeById(payeeId).getAccNumber();
+			if(acc!=acc2) {
+				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			}
+		}catch(Exception e) {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
+		return new ResponseEntity<>(payeeService.getPayeeById(payeeId), HttpStatus.OK);
 	}
 	
 	// build update account REST API
-		// http://localhost:8080/api/Payee/1
-		@PutMapping("{id}")
-		public ResponseEntity<Payee> updatePayee(@PathVariable("id") long id
-													  ,@RequestBody Payee payee){
-			return new ResponseEntity<Payee>(payeeService.updatePayee(payee, id), HttpStatus.OK);
+	// http://localhost:8080/api/Payee/1
+	@PutMapping("accNumber/{id}")
+	public ResponseEntity<String> updatePayee(@PathVariable("id") long id
+												  ,@RequestBody JsonNode jsonNode) throws JsonMappingException, JsonProcessingException{
+		try {
+			long acc = userService.getCurrentUser().getAccount().getAccNumber();
+			if(acc != payeeService.getPayeeById(id).getAccNumber()) {
+				return new ResponseEntity<String>("Payee can only be updated by the account holder", HttpStatus.UNAUTHORIZED);
+			}
+			Payee payee = objectMapper.treeToValue(jsonNode, Payee.class);
+			payee.setAccNumber(acc);
+			payeeService.updatePayee(payee, id);
+		} catch(Exception e) {
+			return new ResponseEntity<>("Error Message "+e.getMessage(),HttpStatus.BAD_REQUEST);
 		}
+		return new ResponseEntity<String>("Payee with payee id: "+ id +" is updated", HttpStatus.OK);
+	}
 		
-		// build delete account REST API
-		// http://localhost:8080/api/Payee/1
-		@DeleteMapping("{id}")
-		public ResponseEntity<String> deletePayee(@PathVariable("id") long id){
-			
-			// delete account from DB
-			payeeService.deletePayee(id);
-			
-			return new ResponseEntity<String>("Payee deleted successfully!.", HttpStatus.OK);
+	// build delete account REST API
+	// http://localhost:8080/api/Payee/1
+	@DeleteMapping("accNumber/{id}")
+	public ResponseEntity<String> deletePayee(@PathVariable("id") long id){	
+		// delete account from DB
+		try {
+			long acc = userService.getCurrentUser().getAccount().getAccNumber();
+			long acc2 = payeeService.getPayeeById(id).getAccNumber();
+			if(acc!=acc2) {
+				return new ResponseEntity<>("Only user can delete his payees",HttpStatus.BAD_REQUEST);
+			}
+		} catch(Exception e){
+			return new ResponseEntity<>("Error Message "+e.getMessage(),HttpStatus.BAD_REQUEST);
 		}
+		try {
+			payeeService.deletePayee(id);		
+		} catch(Exception e) {
+			return new ResponseEntity<>("Error Message"+e.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+		return new ResponseEntity<String>("Payee deleted successfully!.", HttpStatus.OK);
+	}
 }

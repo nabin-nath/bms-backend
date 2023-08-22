@@ -22,10 +22,9 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.example.wfbank.config.AuthenticationConfigConstants;
-import com.example.wfbank.service.impl.OtpService;
 
 public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
-	private final Logger LOGGER = LoggerFactory.getLogger(OtpService.class);
+	private final Logger LOGGER = LoggerFactory.getLogger(JWTAuthorizationFilter.class);
     public JWTAuthorizationFilter(AuthenticationManager authenticationManager) {
         super(authenticationManager);
     }

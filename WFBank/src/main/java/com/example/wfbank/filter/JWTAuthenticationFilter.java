@@ -9,6 +9,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -19,6 +22,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.example.wfbank.config.AuthenticationConfigConstants;
+import com.example.wfbank.config.CustomAuthenticationFailureHandler;
 //import com.example.wfbank.model.User;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,16 +30,20 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 //import lombok.RequiredArgsConstructor;
 
 public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
-
+	private final Logger LOGGER = LoggerFactory.getLogger(JWTAuthenticationFilter.class);
     private final AuthenticationManager authenticationManager;
-    public JWTAuthenticationFilter(AuthenticationManager authManager){
+    
+    public JWTAuthenticationFilter(AuthenticationManager authManager, CustomAuthenticationFailureHandler failureHandler){
     	super();
+    	setAuthenticationFailureHandler(failureHandler);
     	this.authenticationManager = authManager;
     	super.setUsernameParameter("userId");
     }
     
-    @Override public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
+    @Override public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) 
+    					throws AuthenticationException {
         try {
+        	
             JsonNode creds = new ObjectMapper()
                 .readTree(request.getInputStream());
             
@@ -47,19 +55,12 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
             );
         } catch (IOException e) {
             throw new RuntimeException(e);
+        } catch (NullPointerException e) {
+        	throw new AuthenticationCredentialsNotFoundException("userId, password or role not provided");
         }
-        catch (Exception e) {
-        	response.setContentType("application/json");
-        	response.setCharacterEncoding("UTF-8");
-        	try {
-        		response.getWriter().write("{\"message\":\""+e.getMessage()+"\"}");
-        		throw new RuntimeException(e);
-        	} catch(IOException et) {
-        		throw new RuntimeException (et);
-        	}
-        	
-        }
+        
     }
+
 
     @Override protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication auth) throws IOException, ServletException {
     	

@@ -1,6 +1,7 @@
 package com.example.wfbank.service.impl;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
@@ -22,7 +23,7 @@ public class PayeeServiceImpl implements PayeeService {
 	}
 	
 	public List<Payee> getPayeesByAccNumber(long accNumber){
-		return payeeRepository.findByAccount_AccNumber(accNumber);
+		return payeeRepository.findByAccNumber(accNumber);
 	}
 	
 	public List<Payee> getAllPayee() {
@@ -35,9 +36,13 @@ public class PayeeServiceImpl implements PayeeService {
 		return payeeRepository.findById(id).orElseThrow();
 	}
 
-	public Payee updatePayee(Payee payee, long id) {
+	public void updatePayee(Payee payee, long id) {
 		// TODO Auto-generated method stub
-		return null;
+		Optional<Payee> optPayee = payeeRepository.findById(id);
+		if(optPayee.isPresent()) {
+			payee.setId(id);
+			payeeRepository.save(payee);
+		}
 	}
 	
 	public void deletePayee(long id) {

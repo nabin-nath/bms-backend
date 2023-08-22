@@ -8,7 +8,7 @@ public interface PayeeService {
 	Payee savePayee(Payee payee);
 	List<Payee> getAllPayee();
 	Payee getPayeeById(long id);
-	Payee updatePayee(Payee payee, long id);
+	void updatePayee(Payee payee, long id);
 	void deletePayee(long id);
 	List<Payee> getPayeesByAccNumber(long accNumber);
 }
