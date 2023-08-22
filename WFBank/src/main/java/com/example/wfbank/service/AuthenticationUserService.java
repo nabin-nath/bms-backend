@@ -14,46 +14,53 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import com.example.wfbank.model.Admins;
+
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class AuthenticationUserService implements UserDetailsService {
 
-    private final UserService userService;
-    private final AdminsService adminService;
-    private static final String ADMIN = "ADMIN";
-    private static final String USER = "USER";
-    private final Logger LOGGER = LoggerFactory.getLogger(getClass());
-    @Override public UserDetails loadUserByUsername(String IdType) throws UsernameNotFoundException {
-        //userId:role
-		
-    	int idx = IdType.lastIndexOf(":");
-		String userId = IdType.substring(0,idx), userType = IdType.substring(idx+1), password;
+	private final UserService userService;
+	private final AdminsService adminService;
+	private static final String ADMIN = "ADMIN";
+	private static final String USER = "USER";
+	private static final int MAX_FAILED_ATTEMPT = 3;
+	private final Logger LOGGER = LoggerFactory.getLogger(getClass());
+
+	@Override
+	public UserDetails loadUserByUsername(String IdType) throws UsernameNotFoundException {
+		// userId:role
+
+		int idx = IdType.lastIndexOf(":");
+		String userId = IdType.substring(0, idx), userType = IdType.substring(idx + 1), password;
+		boolean nonLocked = false;
 		try {
-			
+
 			if (userType.equals(USER)) {
-				
-				password = userService.getUserById(Long.parseLong(userId)).getPassword();
-			}
-			else if (userType.equals(ADMIN)) {
-				password = adminService.getAdminById(Long.parseLong(userId)).getPassword();
-			}
-			else {
+
+				com.example.wfbank.model.User user = userService.getUserById(Long.parseLong(userId));
+				password = user.getPassword();
+				nonLocked = user.getFailedAttempts() < MAX_FAILED_ATTEMPT;
+			} else if (userType.equals(ADMIN)) {
+				Admins admin = adminService.getAdminById(Long.parseLong(userId));
+				password = admin.getPassword();
+				nonLocked = admin.getFailedAttempts() < MAX_FAILED_ATTEMPT;
+			} else {
 				throw new BadCredentialsException("Unknown Role");
 			}
-			
-				
-		}
-		catch (Exception e) {
+
+		} catch (Exception e) {
 			LOGGER.error("Username Not Found");
-            throw new UsernameNotFoundException(userId);
-        }
-        return new User(userId, password, getAuthorities(userType));
-    }
-    
-    
-    private Collection<? extends GrantedAuthority> getAuthorities(String role) {
-        return Arrays.asList(new SimpleGrantedAuthority(role));
-    }
+			throw new UsernameNotFoundException(userId);
+		}
+		return new User(userId, password, true, true, true, nonLocked, getAuthorities(userType));
+	}
+
+//    public void failedLoginAttempt()
+
+	private Collection<? extends GrantedAuthority> getAuthorities(String role) {
+		return Arrays.asList(new SimpleGrantedAuthority(role));
+	}
 }
