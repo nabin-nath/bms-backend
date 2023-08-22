@@ -22,9 +22,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.wfbank.model.Accounts;
 import com.example.wfbank.model.Address;
 import com.example.wfbank.model.JobDetail;
+import com.example.wfbank.model.User;
 import com.example.wfbank.service.AccountsService;
 import com.example.wfbank.service.UserService;
-import com.example.wfbank.service.impl.OtpService;
 import com.example.wfbank.util.Validator;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -46,37 +46,43 @@ public class AccountsController {
 		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 	}
 	
+	private Accounts validateAccountsData(JsonNode jsonNode) throws Exception{
+		JsonNode sameAsResident = jsonNode.get("permanentSameAsResident");
+		Accounts account = objectMapper.convertValue(jsonNode, Accounts.class);
+		
+		if(!Validator.nonNullFieldsValidator(jsonNode.get("residentAddress"), Address.getNonNullFields())) {
+			throw new Exception("Bad residentAddress");
+		}
+		
+		else if(!Validator.nonNullFieldsValidator(jsonNode.get("occupationDetails"), JobDetail.getNonNullFields())) {
+			throw new Exception("Bad occupationAddress");
+		}
+		
+		else if(!Validator.dateFormatValidator(jsonNode.get("dob"))) {
+			throw new Exception("Bad dob");
+		}
+		
+		else if (sameAsResident !=null && !sameAsResident.isNull() && sameAsResident.asBoolean()) {
+			account.setPermanentAddress(account.getResidentAddress());
+		}
+		
+		else {
+			if(!Validator.nonNullFieldsValidator(jsonNode.get("permanentAddress"), Address.getNonNullFields())) {
+				throw new Exception("Bad PermanentAddress");
+			}
+		}
+		return account;
+	}
 	// build create account REST API
 	@PostMapping()
 	public ResponseEntity<Map<String,String>> saveAccounts(@RequestBody JsonNode jsonNode){
 		long accNumber;
 		Map<String,String>mp = new HashMap<>();
 		try {
-			
-			JsonNode sameAsResident = jsonNode.get("permanentSameAsResident");
-			Accounts account = objectMapper.convertValue(jsonNode, Accounts.class);
-			
-			if(!Validator.nonNullFieldsValidator(jsonNode.get("residentAddress"), Address.getNonNullFields())) {
-				throw new Exception("Bad residentAddress");
-			}
-			
-			else if(!Validator.nonNullFieldsValidator(jsonNode.get("occupationDetails"), JobDetail.getNonNullFields())) {
-				throw new Exception("Bad occupationAddress");
-			}
-			
-			else if(!Validator.dateFormatValidator(jsonNode.get("dob"))) {
-				throw new Exception("Bad dob");
-			}
-			
-			else if (sameAsResident !=null && !sameAsResident.isNull() && sameAsResident.asBoolean()) {
-				account.setPermanentAddress(account.getResidentAddress());
-			}
-			
-			else {
-				if(!Validator.nonNullFieldsValidator(jsonNode.get("permanentAddress"), Address.getNonNullFields())) {
-					throw new Exception("Bad PermanentAddress");
-				}
-			}
+			if(jsonNode.has("accNumber"))
+				throw new Exception("accNumber will be automatically generated");
+			Accounts account = validateAccountsData(jsonNode);
+			account.setApproved(false);
 			accNumber = accountService.saveAccounts(account).getAccNumber();
 			mp.put("accNumber", Long.toString(accNumber));
 		}
@@ -86,15 +92,6 @@ public class AccountsController {
 			return new ResponseEntity<>(mp, HttpStatus.BAD_REQUEST);
 		}
 		
-		
-		
-//		ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-//		Validator validator = factory.getValidator();
-//		Set<ConstraintViolation<Accounts>> violations = validator.validate(account);
-////		if (violations.size()!=0) {
-//			
-//			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-//		}
 		return new ResponseEntity<>(mp, HttpStatus.CREATED);
 	}
 	
@@ -122,6 +119,27 @@ public class AccountsController {
 			account.setApproved(true);
 			accountService.saveAccounts(account);
 			mp.put("message", "Account Approved");
+		}
+		catch (Exception e){
+			mp.put("message", "Account Does Not exist");
+			new ResponseEntity<>(mp, HttpStatus.BAD_REQUEST);
+		}
+			return new ResponseEntity<>(mp, HttpStatus.OK);
+	}
+	
+	@PutMapping
+	public ResponseEntity<Map<String,String>> updateAccountsByUser(@RequestBody JsonNode jsonNode){
+		Map<String, String> mp = new HashMap<>();
+		
+		try {
+			User user = uService.getCurrentUser();
+			Accounts prevAccount = user.getAccount();
+			Accounts account = validateAccountsData(jsonNode);
+			if(account.getAccNumber()!=prevAccount.getAccNumber())
+				throw new Exception("Account Number doesn't belong to the user");
+			account.setBalance(prevAccount.getBalance());
+			accountService.saveAccounts(account);
+			mp.put("message", "Account updated");
 		}
 		catch (Exception e){
 			mp.put("message", "Account Does Not exist");

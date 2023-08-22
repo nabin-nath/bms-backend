@@ -137,6 +137,7 @@ public class UserController {
 				else
 					throw new Exception("Pin and Confirm Pin Does Not match");
 			}
+			user.setFailedAttempts(0);
 			return new ResponseEntity<Object>(UserService.saveUser(user), HttpStatus.OK);
 		}
 		
@@ -158,6 +159,8 @@ public class UserController {
 			user = UserService.getUserById(id);
 			if(user==null)
 				throw new Exception("user with given id does not exist");
+			if(!jsonNode.has("otp"))
+				throw new Exception ("otp not provided");
 			Integer otp = Integer.parseInt(jsonNode.get("otp").asText());
 			long accNumber = user.getAccount().getAccNumber();
 			boolean validated = otpService.validateOTP(Long.toString(accNumber)+":update", otp);
@@ -169,13 +172,14 @@ public class UserController {
 				String confirmPassword = jsonNode.get("confirmPassword").asText();
 				if(password.equals(confirmPassword)) {
 					user.setPassword(passwordEncoder.encode(password));
+					user.setFailedAttempts(0);
 					UserService.saveUser(user);
 				}
 				else
 					throw new Exception("Password and Confirm Password Does Not match");
 			}
 			else
-				throw new Exception("Password Can't Be empty");
+				throw new Exception("Password Can't Be Empty");
 			mp.put("message", "Password Reset Successful");
 			return new ResponseEntity<>(mp, HttpStatus.OK);
 		}

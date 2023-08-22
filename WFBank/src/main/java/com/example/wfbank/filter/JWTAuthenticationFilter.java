@@ -36,6 +36,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 	private final Logger LOGGER = LoggerFactory.getLogger(JWTAuthenticationFilter.class);
     private final AuthenticationManager authenticationManager;
     private final AuthenticationUserService userService;
+    String idType;
     @Autowired
     public JWTAuthenticationFilter(AuthenticationManager authManager, CustomAuthenticationFailureHandler failureHandler,
     		AuthenticationUserService userService){
@@ -52,10 +53,10 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         	
             JsonNode creds = new ObjectMapper()
                 .readTree(request.getInputStream());
-            
+           idType = creds.get("userId").asText()+":"+creds.get("role").asText();
             return authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                    creds.get("userId").asText()+":"+creds.get("role").asText(),
+                    idType,
                     creds.get("password").asText(),
                     new ArrayList<>())
             );
@@ -70,23 +71,25 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     protected void unsuccessfulAuthentication(HttpServletRequest request,
             HttpServletResponse response,
             AuthenticationException failed) throws IOException, ServletException {
+    	LOGGER.info("Unsuccesful Authentication");
     	super.unsuccessfulAuthentication(request, response, failed);
-    	String idType;
+    	
     	int val=-2;
     	if(failed instanceof BadCredentialsException) {
+    		
     		try {
-	    		JsonNode creds = new ObjectMapper()
-	                .readTree(request.getInputStream());
-	            idType = creds.get("userId").asText()+":"+creds.get("role").asText();
+	            LOGGER.info(idType);
 	            val = userService.failedLoginAttempt(idType);
 	    	}	    	
 	    	catch (Exception e) {
 	    	}
     	}
+    	LOGGER.info("Val "+val);
     	if(val>=0) {
     		response.getWriter().write(",\"failedAttempts\":"+Integer.toString(val));
     	}
-    	response.getWriter().write("\"}");
+    	
+    	response.getWriter().write("}");
     }
     	
 
@@ -97,6 +100,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
             .withClaim("role", auth.getAuthorities().iterator().next().getAuthority())
             .withExpiresAt(new Date(System.currentTimeMillis() + AuthenticationConfigConstants.EXPIRATION_TIME))
             .sign(Algorithm.HMAC512(AuthenticationConfigConstants.SECRET.getBytes()));
+    	userService.resetLoginAttempt(idType);
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         response.getWriter().write(
