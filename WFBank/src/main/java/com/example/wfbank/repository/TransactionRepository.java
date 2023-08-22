@@ -6,6 +6,6 @@ import com.example.wfbank.model.Transaction;
 import java.util.List;
 
 public interface TransactionRepository extends JpaRepository<Transaction, Long>{
-	public List<Transaction> findByFromAccNoOrToAccNo(long fromAccNo, long toAccNo);
+	public List<Transaction> findByFromAccAccNumberOrToAccAccNumber(long fromAccNo, long toAccNo);
 	
 }

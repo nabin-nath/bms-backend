@@ -25,7 +25,7 @@ public class TransactionServiceImpl implements TransactionService{
 	@Override
 	public List<Transaction> findByUserId(long AccNo) {
 		// TODO Auto-generated method stub
-		return TransactionRepository.findByFromAccNoOrToAccNo(AccNo,AccNo);
+		return TransactionRepository.findByFromAccAccNumberOrToAccAccNumber(AccNo,AccNo);
 	}
 
 	@Override

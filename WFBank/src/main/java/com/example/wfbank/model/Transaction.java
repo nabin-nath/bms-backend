@@ -28,14 +28,14 @@ import lombok.NoArgsConstructor;
 public class Transaction {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name="transId")
-	private long transId;
+	@Column(name="Id")
+	private long Id;
 	
-	@Column(name="fromAccNo", nullable=false)
-	private long fromAccNo;
-	
-	@Column(name="toAccNo", nullable=false)
-	private long toAccNo;
+//	@Column(name="fromAccNo", nullable=false)
+//	private long fromAccNo;
+//	
+//	@Column(name="toAccNo", nullable=false)
+//	private long toAccNo;
 	
 	@Column(name="amount", nullable=false)
 	private String amount;
@@ -50,11 +50,11 @@ public class Transaction {
 	@Column(name="pin", nullable=false)
 	private String pin;
 	
-//	@ManyToOne(cascade = CascadeType.ALL)
-//    @JoinColumn(referencedColumnName="accNumber")
-//	private long ToAccNo;
-//	
-//	@ManyToOne(cascade = CascadeType.ALL)
-//    @JoinColumn(referencedColumnName="accNumber")
-//	private long FromAccNo;
+	@ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(referencedColumnName="accNumber")
+	private Accounts toAcc;
+	
+	@ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(referencedColumnName="accNumber")
+	private Accounts fromAcc;
 }
