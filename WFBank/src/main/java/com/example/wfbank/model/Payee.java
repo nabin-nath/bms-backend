@@ -31,8 +31,7 @@ public class Payee {
 	@Column(name="nickname", nullable=true)
 	private String nickname;
 	
-	@ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "accNumber", referencedColumnName="accNumber")
-	private Accounts account;
+	@Column(name="accNumber", nullable=false)
+	private long accNumber;
 	
 }
