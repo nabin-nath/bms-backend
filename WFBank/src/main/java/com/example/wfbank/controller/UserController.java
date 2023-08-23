@@ -64,6 +64,8 @@ public class UserController {
 				throw new Exception("Fields cant be empty");
 			Integer otp = Integer.valueOf(jsonNode.get("otp").asInt());
 			Accounts account = accountService.getAccountsById(jsonNode.get("accNumber").asLong());
+			if(!account.getApproved())
+				throw new Exception("Account not yet approved");
 			String password = jsonNode.get("password").asText(), 
 					confirmPassword = jsonNode.get("confirmPassword").asText(), pin = jsonNode.get("pin").asText(),
 					confirmPin = jsonNode.get("confirmPin").asText();

@@ -89,6 +89,7 @@ public class AccountsController {
 		
 		catch(Exception e) {
 			mp.put("message", e.getMessage());
+			LOGGER.error(e.toString());
 			return new ResponseEntity<>(mp, HttpStatus.BAD_REQUEST);
 		}
 		

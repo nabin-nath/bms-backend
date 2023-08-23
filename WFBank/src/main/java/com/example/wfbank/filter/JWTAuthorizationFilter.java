@@ -26,7 +26,7 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.exceptions.TokenExpiredException;
+//import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.example.wfbank.config.AuthenticationConfigConstants;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -53,6 +53,7 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
         }
 //        catch (TokenExpiredException e) {
 //        	response.setStatus(HttpStatus.UNAUTHORIZED.value());
+
 //        	Map<String,String > error = new HashMap<>();
 //            error.put("message",exc.getMessage());
 //            response.setContentType("application/json");

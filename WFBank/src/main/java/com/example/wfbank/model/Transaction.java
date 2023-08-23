@@ -5,9 +5,11 @@ import java.sql.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
+
 import javax.persistence.Id;
 import javax.persistence.Table;
+
+import org.hibernate.annotations.GenericGenerator;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -22,7 +24,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Transaction {
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue(generator = "randomIdGenerator")
+	@GenericGenerator(name = "randomIdGenerator", strategy = "com.example.wfbank.util.RandomIdGenerator" )
 	@Column(name="id")
 	private long id;
 	

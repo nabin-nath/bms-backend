@@ -8,7 +8,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
+//import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
@@ -16,6 +16,9 @@ import javax.persistence.Table;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 
+import org.hibernate.annotations.GenericGenerator;
+
+//import com.example.wfbank.util.RandomIdGenerator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 //import lombok.Getter;
@@ -32,7 +35,9 @@ import lombok.NoArgsConstructor;
 public class Accounts {
 	
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	
+	@GeneratedValue(generator = "randomIdGenerator")
+	@GenericGenerator(name = "randomIdGenerator", strategy = "com.example.wfbank.util.RandomIdGenerator" )
 	@Column(name="accNumber")
 	private long accNumber;
 
