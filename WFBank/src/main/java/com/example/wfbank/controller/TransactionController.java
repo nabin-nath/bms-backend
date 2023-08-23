@@ -1,7 +1,6 @@
 package com.example.wfbank.controller;
 
 import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -10,6 +9,9 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -148,10 +150,21 @@ public class TransactionController {
 	}
 	
 	@PostMapping("accNumber/timestamp")
-	public List<Transaction> getTransactionsBetween(@RequestBody JsonNode jsonNode) throws JsonMappingException, JsonProcessingException {
-		Long accNo = userService.getCurrentUser().getAccount().getAccNumber();
-		Date startTime = objectMapper.convertValue(jsonNode.get("startTime"), Date.class);
-		Date endTime = objectMapper.convertValue(jsonNode.get("endTime"), Date.class);
-		return TransactionService.getBetweenTimeStamp(accNo, startTime, endTime);
+	public ResponseEntity<Page<Transaction>> getTransactionsBetween(@RequestBody JsonNode jsonNode) throws JsonMappingException, JsonProcessingException {
+		try {
+			int size=2,page=0;
+			try {
+				jsonNode.get("page").asInt();
+				jsonNode.get("size").asInt();
+			} catch(Exception e) {
+			}
+			Pageable pageable = PageRequest.of(page, size);
+			Long accNo = userService.getCurrentUser().getAccount().getAccNumber();
+			Date startTime = objectMapper.convertValue(jsonNode.get("startTime"), Date.class);
+			Date endTime = objectMapper.convertValue(jsonNode.get("endTime"), Date.class);
+			return new ResponseEntity<>(TransactionService.getBetweenTimeStamp(accNo, startTime, endTime, pageable),HttpStatus.OK);
+		} catch(Exception e) {
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		}
 	}
 }
