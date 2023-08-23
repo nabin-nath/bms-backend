@@ -24,20 +24,24 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Autowired private final BCryptPasswordEncoder bCryptPasswordEncoder;
     @Autowired private final AuthenticationUserService userService;
+    @Autowired
+	private AuthEntryPointJwt unauthorizedHandler;
 
     @Autowired
     private CustomAuthenticationFailureHandler authenticationFailureHandler;
     @Override protected void configure(HttpSecurity http) throws Exception {
     	
-        http
+        http.exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
         .cors().and()
         .csrf().disable().authorizeRequests()
         	
             .antMatchers(HttpMethod.POST, AuthenticationConfigConstants.SIGN_UP_URL).permitAll()
             .antMatchers(HttpMethod.POST, "/api/accounts").permitAll()
-            .antMatchers("/api/accounts/**").permitAll()
+            .antMatchers("/api/accounts").hasAuthority("ADMIN")
+            .antMatchers("/api/accounts/**").hasAuthority("ADMIN")
+//            .antMatchers(List<>(HttpMethod.PUT,HttpMethod.GET),"/api/accounts/**").hasAuthority("ADMIN")
             .antMatchers("/api/user").hasAuthority("USER")
-            .antMatchers("/api/user/**").permitAll()
+            .antMatchers("/api/user/otp-gen/**").permitAll()
             .antMatchers("/login").permitAll()
            // .antMatchers(null)
             .anyRequest().authenticated()

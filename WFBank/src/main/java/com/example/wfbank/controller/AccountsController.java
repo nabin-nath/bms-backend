@@ -158,7 +158,7 @@ public class AccountsController {
 		try {
 			if(accountService.getAccountsById(id).getApproved())
 				throw new Exception("Account is Already Approved");
-			uService.deleteUser(uService.findByAccount(id));
+//			uService.deleteUser(uService.findByAccount(id));
 			accountService.deleteAccounts(id);
 			
 			return new ResponseEntity<String>("Accounts deleted successfully!.", HttpStatus.OK);
