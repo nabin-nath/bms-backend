@@ -1,9 +1,12 @@
 package com.example.wfbank.controller;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +28,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("/api/transaction")
@@ -48,14 +50,16 @@ public class TransactionController {
 	}
 	
 	@PostMapping()
-	public ResponseEntity<String> saveTransaction(@RequestBody JsonNode jsonNode) throws JsonMappingException, JsonProcessingException{
+	public ResponseEntity<Map<String,String>> saveTransaction(@RequestBody JsonNode jsonNode) throws JsonMappingException, JsonProcessingException{
 //		JsonNode jsonNode = objectMapper.readTree(requestBody);
 		User user;
+		Map<String,String>mp = new HashMap<>();
 		try {
 			user = userService.getCurrentUser();
 		}
 		catch (Exception e) {
-			return new ResponseEntity<String>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+			mp.put("message", e.getMessage());
+			return new ResponseEntity<>(mp, HttpStatus.UNAUTHORIZED);
 		}
 		long transId;
 		try {
@@ -69,34 +73,34 @@ public class TransactionController {
 			String type = jsonNode.get("transType").toString();
 			
 			if(fromAcc != user.getAccount().getAccNumber()) {
-				return new ResponseEntity<String>("Transaction can be done by your account only", HttpStatus.BAD_REQUEST);
+				throw new Exception("Transaction can be done by your account only");
 			}
 			LOGGER.info(user.getPin() + ":"+user.getUserId());
 			if(!(passwordEncoder.matches(jsonNode.get("pin").asText(), user.getPin()))) {
-				return new ResponseEntity<String>("Invalid Pin", HttpStatus.UNAUTHORIZED);
+				throw new Exception("Invalid Pin");
 			}
 			
 			if(accountsService.existsById(toAcc)==false) {
-				return new ResponseEntity<String>("Transaction done to an invalid account", HttpStatus.BAD_REQUEST);
+				throw new Exception("Transaction done to an invalid account");
 			}
 			
 			if(type.equals("RTGS")) {
 				if((amount.compareTo(BigDecimal.valueOf(200000)) == -1)&& (amount.compareTo(BigDecimal.valueOf(1000000)) == 1)) {
-					return new ResponseEntity<String>("Transaction amount should be between 2 Lakhs and 10 Lakhs", HttpStatus.BAD_REQUEST);
+					throw new Exception("Transaction amount should be between 2 Lakhs and 10 Lakhs");
 				}
 			}
 			else if(type.equals("IMPS")) {
 				if(amount.compareTo(BigDecimal.valueOf(500000)) == 1) {
-					return new ResponseEntity<String>("Transaction amount should be less than 5 Lakhs", HttpStatus.BAD_REQUEST);
+					throw new Exception("Transaction amount should be less than 5 Lakhs");
 				}
 			}
 			else {
 				if(amount.compareTo(BigDecimal.valueOf(1000000)) == 1) {
-					return new ResponseEntity<String>("Transaction amount should be less than 10 Lakhs", HttpStatus.BAD_REQUEST);
+					throw new Exception("Transaction amount should be less than 10 Lakhs");
 				}
 			}
 			if(amount.compareTo(balance) == 1) {
-				return new ResponseEntity<String>("Insufficent balance", HttpStatus.BAD_REQUEST);
+				throw new Exception("Insufficent balance");
 			}
 			
 			BigDecimal toBalance = toAccount.getBalance();
@@ -118,9 +122,12 @@ public class TransactionController {
 			transId = TransactionService.saveTransaction(transaction).getId();
 		}
 		catch (Exception e) {
-			return new ResponseEntity<>("Error Message "+e.getMessage(),HttpStatus.BAD_REQUEST);
+			mp.put("message", e.getMessage());
+			return new ResponseEntity<>(mp,HttpStatus.BAD_REQUEST);
 		}
-			return new ResponseEntity<>("Transaction Success \nTransaction Id is "+transId, HttpStatus.CREATED);
+			mp.put("message", "Transaction Succesful");
+			mp.put("transId", Long.toString(transId));
+			return new ResponseEntity<>(mp, HttpStatus.CREATED);
 	}
 	
 	@GetMapping
