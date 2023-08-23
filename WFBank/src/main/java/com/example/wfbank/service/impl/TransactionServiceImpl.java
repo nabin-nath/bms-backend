@@ -1,5 +1,6 @@
 package com.example.wfbank.service.impl;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -38,5 +39,10 @@ public class TransactionServiceImpl implements TransactionService{
 	public List<Transaction> findByUserId(long AccNo) {
 		// TODO Auto-generated method stub
 		return TransactionRepository.findByFromAccOrToAcc(AccNo, AccNo);
+	}
+	
+	@Override
+	public List<Transaction> getBetweenTimeStamp(long AccNo, Date start, Date end) {
+		return TransactionRepository.findByFromAccAndTimeStampBetweenOrToAccAndTimeStampBetweenOrderByTimeStamp(AccNo, start, end, AccNo, start, end);
 	}
 }

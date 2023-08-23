@@ -1,6 +1,8 @@
 package com.example.wfbank.controller;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -143,5 +145,13 @@ public class TransactionController {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 		return new ResponseEntity<>(transaction, HttpStatus.OK);
+	}
+	
+	@PostMapping("accNumber/timestamp")
+	public List<Transaction> getTransactionsBetween(@RequestBody JsonNode jsonNode) throws JsonMappingException, JsonProcessingException {
+		Long accNo = userService.getCurrentUser().getAccount().getAccNumber();
+		Date startTime = objectMapper.convertValue(jsonNode.get("startTime"), Date.class);
+		Date endTime = objectMapper.convertValue(jsonNode.get("endTime"), Date.class);
+		return TransactionService.getBetweenTimeStamp(accNo, startTime, endTime);
 	}
 }
