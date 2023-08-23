@@ -57,7 +57,7 @@ public class PayeeController {
 		long payeeId;
 		try {
 			if(!accountService.existsById(jsonNode.get("beneficiaryAccNumber").asLong())) {
-				return new ResponseEntity<String>("Beneficiary account does not exist", HttpStatus.BAD_REQUEST);
+				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 			}
 			Payee payee = objectMapper.treeToValue(jsonNode, Payee.class);
 			payee.setAccNumber(user.getAccount().getAccNumber());

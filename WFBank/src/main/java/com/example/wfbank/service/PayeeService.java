@@ -11,4 +11,5 @@ public interface PayeeService {
 	void updatePayee(Payee payee, long id);
 	void deletePayee(long id);
 	List<Payee> getPayeesByAccNumber(long accNumber);
+	boolean payeeExists(long accNo, long benNo);
 }
