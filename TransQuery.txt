@@ -12,3 +12,7 @@ return 201 created.
 GET http://localhost:8081/api/transaction
 return all the transaction.
 (Only for admin)
+
+GET http://localhost:8081/api/transaction/accNumber
+return all the transaction done by user or done to user
+(Only for user who is logged in to see transactions related to him)

@@ -53,7 +53,10 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
         }
 //        catch (TokenExpiredException e) {
 //        	response.setStatus(HttpStatus.UNAUTHORIZED.value());
-//        	response.setHeader("error", "Session Expired");
+
+//        	Map<String,String > error = new HashMap<>();
+//            error.put("message",exc.getMessage());
+//            response.setContentType("application/json");
 //        	throw new BadCredentialsException(e.getMessage());
 //    	}
         catch (Exception exception){

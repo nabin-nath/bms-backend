@@ -37,9 +37,6 @@ public class TransactionServiceImpl implements TransactionService{
 	@Override
 	public List<Transaction> findByUserId(long AccNo) {
 		// TODO Auto-generated method stub
-		return null;
+		return TransactionRepository.findByFromAccOrToAcc(AccNo, AccNo);
 	}
-	
-	
-	
 }

@@ -32,7 +32,7 @@ return 201 on success
 
 To Create User
 Generate Otp first
-GET http://localhost:8081/api/user/otp-gen/create
+POST http://localhost:8081/api/user/otp-gen/create
 {
     "accNumber":1
 }

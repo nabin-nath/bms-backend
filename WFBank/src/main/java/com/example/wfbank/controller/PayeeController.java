@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.wfbank.model.Accounts;
 import com.example.wfbank.model.Payee;
 import com.example.wfbank.model.User;
 import com.example.wfbank.service.AccountsService;
