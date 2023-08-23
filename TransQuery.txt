@@ -16,3 +16,11 @@ return all the transaction.
 GET http://localhost:8081/api/transaction/accNumber
 return all the transaction done by user or done to user
 (Only for user who is logged in to see transactions related to him)
+
+POST http://localhost:8081/api/transaction/accNumber/timestamp
+{
+    "startTime": "2027-09-07",
+    "endTime": "2027-09-07"
+    "size":pageSize, "page";pageno,"type" optional fields
+}
+return

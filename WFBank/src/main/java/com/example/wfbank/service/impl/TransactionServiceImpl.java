@@ -1,7 +1,10 @@
 package com.example.wfbank.service.impl;
 
+import java.util.Date;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.example.wfbank.model.Transaction;
@@ -38,5 +41,15 @@ public class TransactionServiceImpl implements TransactionService{
 	public List<Transaction> findByUserId(long AccNo) {
 		// TODO Auto-generated method stub
 		return TransactionRepository.findByFromAccOrToAcc(AccNo, AccNo);
+	}
+	
+	@Override
+	public List<Transaction> getBetweenTimeStamp(long AccNo, Date start, Date end) {
+		return TransactionRepository.findByFromAccAndTimeStampBetweenOrToAccAndTimeStampBetweenOrderByTimeStamp(AccNo, start, end, AccNo, start, end);
+	}
+	
+	@Override
+	public Page<Transaction> getBetweenTimeStamp(long AccNo, Date start, Date end,String type, Pageable pageable) {
+		return TransactionRepository.findByAccountBetweenDate(AccNo, start, end,type, pageable);
 	}
 }
