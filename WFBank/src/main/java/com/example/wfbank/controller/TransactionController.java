@@ -111,8 +111,8 @@ public class TransactionController {
 			BigDecimal toBalance = toAccount.getBalance();
 			balance = balance.subtract(amount);
 			toBalance = toBalance.add(amount);
-			fromAccount.setBalance(toBalance);
-			toAccount.setBalance(balance);
+			fromAccount.setBalance(balance);
+			toAccount.setBalance(toBalance);
 			
 			accountsService.saveAccounts(fromAccount);
 			accountsService.saveAccounts(toAccount);
@@ -122,8 +122,11 @@ public class TransactionController {
 			
 			
 			Transaction transaction = objectMapper.treeToValue(jsonNode, Transaction.class);
-//			transaction.setFromAcc(fromAcc);
-//			transaction.setToAcc(toAcc);
+//			transaction.setFromAcc(transType);
+//			transaction.setFromAcc(balance));
+//			transaction.setFromAcc(timeStamp);
+			transaction.setFromAcc(fromAcc);
+			transaction.setToAcc(toAcc);
 			transId = TransactionService.saveTransaction(transaction).getId();
 		}
 		catch (Exception e) {
