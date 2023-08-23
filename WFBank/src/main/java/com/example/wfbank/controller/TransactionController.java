@@ -3,9 +3,11 @@ package com.example.wfbank.controller;
 import java.math.BigDecimal;
 import java.util.List;
 
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,6 +25,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("/api/transaction")
@@ -30,13 +33,16 @@ public class TransactionController {
 	@Autowired private TransactionService TransactionService;
 	@Autowired private AccountsService accountsService;
 	@Autowired private UserService userService;
+	@Autowired private BCryptPasswordEncoder passwordEncoder;
 	private ObjectMapper objectMapper;
-	
-	public TransactionController(TransactionService TransactionService, UserService userService, AccountsService accountService) {
+	private Logger LOGGER = LoggerFactory.getLogger(getClass())	;
+	public TransactionController(TransactionService TransactionService, UserService userService, 
+			AccountsService accountService, BCryptPasswordEncoder passwordEncoder) {
 		super();
 		this.TransactionService = TransactionService;
 		this.userService = userService;
 		this.accountsService = accountService;
+		this.passwordEncoder = passwordEncoder;
 		this.objectMapper = new ObjectMapper();
 		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 	}
@@ -65,6 +71,11 @@ public class TransactionController {
 			if(fromAcc != user.getAccount().getAccNumber()) {
 				return new ResponseEntity<String>("Transaction can be done by your account only", HttpStatus.BAD_REQUEST);
 			}
+			LOGGER.info(user.getPin() + ":"+user.getUserId());
+			if(!(passwordEncoder.matches(jsonNode.get("pin").asText(), user.getPin()))) {
+				return new ResponseEntity<String>("Invalid Pin", HttpStatus.UNAUTHORIZED);
+			}
+			
 			if(accountsService.existsById(toAcc)==false) {
 				return new ResponseEntity<String>("Transaction done to an invalid account", HttpStatus.BAD_REQUEST);
 			}
@@ -93,8 +104,12 @@ public class TransactionController {
 			toBalance = toBalance.add(amount);
 			fromAccount.setBalance(toBalance);
 			toAccount.setBalance(balance);
-			accountsService.updateAccounts(fromAccount, fromAcc);
-			accountsService.updateAccounts(toAccount, toAcc);
+			
+			accountsService.saveAccounts(fromAccount);
+			accountsService.saveAccounts(toAccount);
+			
+//			accountsService.updateAccounts(fromAccount, fromAcc);
+//			accountsService.updateAccounts(toAccount, toAcc);
 			
 			
 			Transaction transaction = objectMapper.treeToValue(jsonNode, Transaction.class);

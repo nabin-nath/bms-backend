@@ -41,10 +41,6 @@ public class Transaction {
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern="yyyy-MM-dd", timezone="IST")
 	@Column(name="timeStamp", nullable=false)
 	private Date timeStamp;
-	
-	@Column(name="pin", nullable=false)
-	private String pin;
-	
 //	@ManyToOne(cascade = CascadeType.ALL)
 //    @JoinColumn(referencedColumnName="accNumber")
 //	private Accounts toAcc;
