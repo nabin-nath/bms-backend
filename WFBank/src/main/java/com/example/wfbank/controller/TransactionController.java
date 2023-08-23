@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -121,8 +122,8 @@ public class TransactionController {
 			
 			
 			Transaction transaction = objectMapper.treeToValue(jsonNode, Transaction.class);
-			transaction.setFromAcc(fromAcc);
-			transaction.setToAcc(toAcc);
+//			transaction.setFromAcc(fromAcc);
+//			transaction.setToAcc(toAcc);
 			transId = TransactionService.saveTransaction(transaction).getId();
 		}
 		catch (Exception e) {
@@ -153,17 +154,21 @@ public class TransactionController {
 	public ResponseEntity<Page<Transaction>> getTransactionsBetween(@RequestBody JsonNode jsonNode) throws JsonMappingException, JsonProcessingException {
 		try {
 			int size=2,page=0;
-			try {
-				jsonNode.get("page").asInt();
-				jsonNode.get("size").asInt();
-			} catch(Exception e) {
-			}
-			Pageable pageable = PageRequest.of(page, size);
+			String type="";
+			if(jsonNode.has("page"))
+				page = jsonNode.get("page").asInt();
+			if(jsonNode.has("size"))
+				size = jsonNode.get("size").asInt();
+			if(jsonNode.has("type"))
+				type = jsonNode.get("type").asText();
+			LOGGER.info("Type:"+type);
+			Pageable pageable = PageRequest.of(page, size,Sort.by("timeStamp"));
 			Long accNo = userService.getCurrentUser().getAccount().getAccNumber();
 			Date startTime = objectMapper.convertValue(jsonNode.get("startTime"), Date.class);
 			Date endTime = objectMapper.convertValue(jsonNode.get("endTime"), Date.class);
-			return new ResponseEntity<>(TransactionService.getBetweenTimeStamp(accNo, startTime, endTime, pageable),HttpStatus.OK);
+			return new ResponseEntity<>(TransactionService.getBetweenTimeStamp(accNo, startTime, endTime,type, pageable),HttpStatus.OK);
 		} catch(Exception e) {
+			LOGGER.error(e.getMessage());
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 	}

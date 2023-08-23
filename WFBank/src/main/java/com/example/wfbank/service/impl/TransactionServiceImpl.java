@@ -49,7 +49,7 @@ public class TransactionServiceImpl implements TransactionService{
 	}
 	
 	@Override
-	public Page<Transaction> getBetweenTimeStamp(long AccNo, Date start, Date end, Pageable pageable) {
-		return TransactionRepository.findByFromAccAndTimeStampBetweenOrToAccAndTimeStampBetweenOrderByTimeStamp(AccNo, start, end, AccNo, start, end,pageable);
+	public Page<Transaction> getBetweenTimeStamp(long AccNo, Date start, Date end,String type, Pageable pageable) {
+		return TransactionRepository.findByAccountBetweenDate(AccNo, start, end,type, pageable);
 	}
 }

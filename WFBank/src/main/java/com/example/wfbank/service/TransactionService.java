@@ -13,5 +13,5 @@ public interface TransactionService {
     public List<Transaction> findByUserId(long AccNo);
     List<Transaction> getAllTransaction();
     List<Transaction> getBetweenTimeStamp(long AccNo, Date start, Date end);
-    Page<Transaction> getBetweenTimeStamp(long AccNo, Date start, Date end, Pageable pageable);
+    Page<Transaction> getBetweenTimeStamp(long AccNo, Date start, Date end,String type, Pageable pageable);
 }
