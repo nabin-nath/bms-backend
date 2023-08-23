@@ -26,7 +26,7 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.exceptions.TokenExpiredException;
+//import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.example.wfbank.config.AuthenticationConfigConstants;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -50,11 +50,13 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
         	UsernamePasswordAuthenticationToken authentication = getAuthentication(request);
         	SecurityContextHolder.getContext().setAuthentication(authentication);
             
-        } catch (TokenExpiredException e) {
-        	response.setStatus(HttpStatus.UNAUTHORIZED.value());
-        	response.setHeader("error", "Session Expired");
-        	throw new BadCredentialsException(e.getMessage());
-    	}catch (Exception exception){
+        }
+//        catch (TokenExpiredException e) {
+//        	response.setStatus(HttpStatus.UNAUTHORIZED.value());
+//        	response.setHeader("error", "Session Expired");
+//        	throw new BadCredentialsException(e.getMessage());
+//    	}
+        catch (Exception exception){
             LOGGER.error("Error logging in : {} ", exception.getMessage());
             response.setHeader("error",exception.getMessage());
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
