@@ -1,6 +1,8 @@
 package com.example.wfbank.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -46,29 +48,30 @@ public class PayeeController {
 	}
 	
 	@PostMapping()
-	public ResponseEntity<String> savePayee(@RequestBody JsonNode jsonNode) throws JsonMappingException, JsonProcessingException{
+	public ResponseEntity<Map<String,String>> savePayee(@RequestBody JsonNode jsonNode) throws JsonMappingException, JsonProcessingException{
 //		JsonNode jsonNode = objectMapper.readTree(requestBody);
 		User user;
-		try {
-			user = userService.getCurrentUser();
-		}
-		catch (Exception e) {
-			return new ResponseEntity<String>(e.getMessage(), HttpStatus.UNAUTHORIZED);
-		}
+		Map<String,String> mp = new HashMap<>();
 		long payeeId;
 		try {
+
 			Accounts ac =accountService.getAccountsById(jsonNode.get("beneficiaryAccNumber").asLong());
+			user = userService.getCurrentUser();
 			if(ac==null || !ac.getApproved()) {
-				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+				mp.put("message", "Beneficiary Account Number");
+				return new ResponseEntity<>(mp, HttpStatus.NOT_FOUND);
 			}
 			Payee payee = objectMapper.treeToValue(jsonNode, Payee.class);
 			payee.setAccNumber(user.getAccount().getAccNumber());
 			payeeId = payeeService.savePayee(payee).getId();
 		}
 		catch (Exception e) {
-			return new ResponseEntity<>("Error Message "+e.getMessage(),HttpStatus.BAD_REQUEST);
+			mp.put("message", e.getMessage());
+			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 		}
-			return new ResponseEntity<>("Payee Created Succesfully \nPayee Id is "+payeeId, HttpStatus.CREATED);
+		String str = "Payee Created Succesfully \nPayee Id is "+payeeId;
+		mp.put("message", str);
+		return new ResponseEntity<>(HttpStatus.CREATED);
 	}
 	
 	// build get all Payee REST API
@@ -78,13 +81,15 @@ public class PayeeController {
 	}
 	
 	@GetMapping("accNumber")
-	public ResponseEntity<List<Payee>> getPayeesByAccNumber (){
+	public ResponseEntity<?> getPayeesByAccNumber (){
 		long accNumber = userService.getCurrentUser().getAccount().getAccNumber();
+		HashMap<String, String> mp = new HashMap<>();
 		List<Payee> payees = payeeService.getPayeesByAccNumber(accNumber);
 		if(payees.isEmpty()) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			mp.put("message", "No payees found");
+			return new ResponseEntity<>(mp, HttpStatus.NOT_FOUND);
 		}
-		return new ResponseEntity<>(payees, HttpStatus.OK);
+		return new ResponseEntity<List<Payee>>(payees, HttpStatus.OK);
 	}
 
 	// build get account by id REST API
