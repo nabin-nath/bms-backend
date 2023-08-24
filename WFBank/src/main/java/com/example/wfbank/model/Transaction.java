@@ -30,10 +30,10 @@ public class Transaction {
 	@Column(name="id")
 	private long id;
 	
-	@Column(name="fromAcc", nullable=false)
+	@Column(name="fromAcc", columnDefinition="bigint not null references accounts(acc_number) on delete cascade")
 	private long fromAcc;
 	
-	@Column(name="toAcc", nullable=false)
+	@Column(name="toAcc", columnDefinition="bigint not null references accounts(acc_number)")
 	private long toAcc;
 
 	@Column(name="amount", nullable=false)
