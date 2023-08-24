@@ -50,4 +50,11 @@ public class PayeeServiceImpl implements PayeeService {
 		payeeRepository.findById(id);
 		payeeRepository.deleteById(id);
 	}
+	
+	public boolean payeeExists(long accNo, long benNo) {
+		if(payeeRepository.findByAccNumberAndBeneficiaryAccNumber(accNo, benNo)!=null) {
+			return true;
+		}
+		return false;
+	}
 }
