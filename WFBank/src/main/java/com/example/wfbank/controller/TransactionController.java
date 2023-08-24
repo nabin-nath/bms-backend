@@ -1,6 +1,7 @@
 package com.example.wfbank.controller;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -167,8 +168,11 @@ public class TransactionController {
 			LOGGER.info("Type:"+type);
 			Pageable pageable = PageRequest.of(page, size,Sort.by("timeStamp"));
 			Long accNo = userService.getCurrentUser().getAccount().getAccNumber();
-			Date startTime = objectMapper.convertValue(jsonNode.get("startTime"), Date.class);
-			Date endTime = objectMapper.convertValue(jsonNode.get("endTime"), Date.class);
+			
+			Timestamp startTime = Timestamp.valueOf(jsonNode.get("startTime").asText()+" 00:00:00");
+			Timestamp endTime = Timestamp.valueOf(jsonNode.get("endTime").asText()+" 00:00:00");
+			LOGGER.info("Start Time: {}",startTime);
+			LOGGER.info("End Time: {}",endTime);
 			return new ResponseEntity<>(TransactionService.getBetweenTimeStamp(accNo, startTime, endTime,type, pageable),HttpStatus.OK);
 		} catch(Exception e) {
 			LOGGER.error(e.getMessage());

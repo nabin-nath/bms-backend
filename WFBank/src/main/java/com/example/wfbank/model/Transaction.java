@@ -1,14 +1,15 @@
 package com.example.wfbank.model;
 
-import java.sql.Date;
+//import java.sql.Date;
+import java.sql.Timestamp;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
-
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -41,9 +42,10 @@ public class Transaction {
 	@Column(name="transType", nullable=false)
 	private String transType;
 	
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern="yyyy-MM-dd", timezone="IST")
+	@CreationTimestamp
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern="yyyy-MM-dd HH:mm:ss", timezone="IST")
 	@Column(name="timeStamp", nullable=false)
-	private Date timeStamp;
+	private Timestamp timeStamp;
 //	@ManyToOne(cascade = CascadeType.ALL)
 //    @JoinColumn(referencedColumnName="accNumber")
 //	private Accounts toAcc;

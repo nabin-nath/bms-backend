@@ -1,5 +1,6 @@
 package com.example.wfbank.service.impl;
 
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 
@@ -49,7 +50,7 @@ public class TransactionServiceImpl implements TransactionService{
 	}
 	
 	@Override
-	public Page<Transaction> getBetweenTimeStamp(long AccNo, Date start, Date end,String type, Pageable pageable) {
+	public Page<Transaction> getBetweenTimeStamp(long AccNo, Timestamp start, Timestamp end,String type, Pageable pageable) {
 		return TransactionRepository.findByAccountBetweenDate(AccNo, start, end,type, pageable);
 	}
 }
