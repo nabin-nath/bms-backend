@@ -194,14 +194,14 @@ public class UserController {
 	}
 	// build delete account REST API
 	// http://localhost:8080/api/User/1
-	@DeleteMapping("{id}")
+	/*@DeleteMapping("{id}")
 	public ResponseEntity<String> deleteUser(@PathVariable("id") long id){
 		
 		// delete account from DB
 		UserService.deleteUser(id);
 		
 		return new ResponseEntity<String>("User deleted successfully!.", HttpStatus.OK);
-	}
+	}*/
 	
 	@PostMapping("/id")
 	public ResponseEntity<Map<String, String>> getUserAccNumber(@RequestBody JsonNode jsonNode){

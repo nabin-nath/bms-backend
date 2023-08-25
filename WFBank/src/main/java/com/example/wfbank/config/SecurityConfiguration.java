@@ -40,7 +40,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             .antMatchers("/api/accounts").hasAuthority("ADMIN")
             .antMatchers("/api/accounts/**").hasAuthority("ADMIN")
             .antMatchers("/api/payee","/api/payee/**","/api/user").hasAuthority("USER")
-            .antMatchers("/api/user/otp-gen/**").permitAll()
+            .antMatchers("/api/user/**").permitAll()
             .antMatchers("/login").permitAll()
            // .antMatchers(null)
             .anyRequest().authenticated()

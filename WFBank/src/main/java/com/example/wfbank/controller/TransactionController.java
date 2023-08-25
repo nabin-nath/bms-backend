@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,10 +91,11 @@ public class TransactionController {
 				throw new Exception("Transaction done to an invalid account");
 			}
 			
-			if(type.equals("RTGS")) {
+			if(type.equalsIgnoreCase("RTGS")) {
 				if((amount.compareTo(BigDecimal.valueOf(200000)) == -1)&& (amount.compareTo(BigDecimal.valueOf(1000000)) == 1)) {
 					throw new Exception("Transaction amount should be between 2 Lakhs and 10 Lakhs");
 				}
+				System.out.println(type);
 			}
 			else if(type.equals("IMPS")) {
 				if(amount.compareTo(BigDecimal.valueOf(500000)) == 1) {

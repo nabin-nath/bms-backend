@@ -55,8 +55,7 @@ public class PayeeController {
 		try {
 			user = userService.getCurrentUser();
 			if(!accountService.existsById(jsonNode.get("beneficiaryAccNumber").asLong())) {
-				mp.put("message", "Beneficiary Account Number");
-				return new ResponseEntity<>(mp, HttpStatus.NOT_FOUND);
+				throw new Exception("Beneficiary Account Not Found");
 			}
 			Payee payee = objectMapper.treeToValue(jsonNode, Payee.class);
 			payee.setAccNumber(user.getAccount().getAccNumber());
@@ -64,11 +63,11 @@ public class PayeeController {
 		}
 		catch (Exception e) {
 			mp.put("message", e.getMessage());
-			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+			return new ResponseEntity<>(mp, HttpStatus.UNAUTHORIZED);
 		}
 		String str = "Payee Created Succesfully \nPayee Id is "+payeeId;
 		mp.put("message", str);
-		return new ResponseEntity<>(HttpStatus.CREATED);
+		return new ResponseEntity<>(mp, HttpStatus.CREATED);
 	}
 	
 	// build get all Payee REST API
