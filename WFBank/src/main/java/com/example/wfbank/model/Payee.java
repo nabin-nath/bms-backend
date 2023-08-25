@@ -27,12 +27,12 @@ public class Payee {
 	private long id;
 	@Column(name="beneficiaryName", nullable=false)
 	private String beneficiaryName;
-	@Column(name="beneficiaryAccNumber", nullable=false)
+	@Column(name="beneficiaryAccNumber",columnDefinition="bigint not null references accounts(acc_number) on delete cascade")
 	private long beneficiaryAccNumber;
 	@Column(name="nickname", nullable=true)
 	private String nickname;
 	
-	@Column(name="accNumber", nullable=false)
+	@Column(name="accNumber", columnDefinition="bigint not null references accounts(acc_number) on delete cascade")
 	private long accNumber;
 	
 }

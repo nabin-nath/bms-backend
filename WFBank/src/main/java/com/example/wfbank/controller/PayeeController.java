@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.wfbank.model.Accounts;
 import com.example.wfbank.model.Payee;
 import com.example.wfbank.model.User;
 import com.example.wfbank.service.AccountsService;
@@ -53,9 +54,12 @@ public class PayeeController {
 		Map<String,String> mp = new HashMap<>();
 		long payeeId;
 		try {
+
+			Accounts ac =accountService.getAccountsById(jsonNode.get("beneficiaryAccNumber").asLong());
 			user = userService.getCurrentUser();
-			if(!accountService.existsById(jsonNode.get("beneficiaryAccNumber").asLong())) {
-				throw new Exception("Beneficiary Account Not Found");
+			if(ac==null || !ac.getApproved()) {
+				mp.put("message", "Beneficiary Account Number");
+				return new ResponseEntity<>(mp, HttpStatus.NOT_FOUND);
 			}
 			Payee payee = objectMapper.treeToValue(jsonNode, Payee.class);
 			payee.setAccNumber(user.getAccount().getAccNumber());

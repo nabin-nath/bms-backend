@@ -77,7 +77,7 @@ public class TransactionController {
 			Accounts fromAccount = user.getAccount();
 			BigDecimal amount = BigDecimal.valueOf(jsonNode.get("amount").asLong());
 			BigDecimal balance = fromAccount.getBalance();
-			String type = jsonNode.get("transType").toString();
+			String type = jsonNode.get("transType").asText();
 			
 			if(fromAcc != user.getAccount().getAccNumber()) {
 				throw new Exception("Transaction can be done by your account only");
@@ -91,18 +91,22 @@ public class TransactionController {
 				throw new Exception("Transaction done to an invalid account");
 			}
 			
-			if(type.equalsIgnoreCase("RTGS")) {
+			if(type.equals("RTGS")) {
+				LOGGER.info(type + " in RTGS");
+
 				if((amount.compareTo(BigDecimal.valueOf(200000)) == -1)&& (amount.compareTo(BigDecimal.valueOf(1000000)) == 1)) {
 					throw new Exception("Transaction amount should be between 2 Lakhs and 10 Lakhs");
 				}
 				System.out.println(type);
 			}
 			else if(type.equals("IMPS")) {
+				LOGGER.info(type + " in IMPS");
 				if(amount.compareTo(BigDecimal.valueOf(500000)) == 1) {
 					throw new Exception("Transaction amount should be less than 5 Lakhs");
 				}
 			}
 			else {
+				LOGGER.info(type + " in NEFT");
 				if(amount.compareTo(BigDecimal.valueOf(1000000)) == 1) {
 					throw new Exception("Transaction amount should be less than 10 Lakhs");
 				}
