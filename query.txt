@@ -114,3 +114,13 @@ Approve Account
 
 DELETE http://localhost:8081/api/accounts/1
 delete request
+
+Change password or pin after login
+PUT http://localhost:8081/api/user
+password:,
+confirmPassword
+pin
+confirmPin
+can send only password or pin too
+
+
