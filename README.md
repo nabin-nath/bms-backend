@@ -1,2 +1,2 @@
-# wfbank
-banking application
+# Banking Application
+- Made in Java bootcamp
